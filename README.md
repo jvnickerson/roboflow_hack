@@ -99,3 +99,8 @@ night; stop-loss: two dry hours → recorded footage.
 
 NYC DOT: `https://webcams.nyctmc.org/api/cameras` — open JSON, no key.
 352×240 JPEG per camera, refreshes every ~2 s, timestamp burned in.
+
+Bird cams around the city, with live status checked per cam and raw endpoints:
+[`BIRD_CAMS.md`](BIRD_CAMS.md). Six were streaming on 2026-08-07; two expose an
+unauthenticated `.m3u8` that ffmpeg or OpenCV reads directly, the rest are on
+YouTube.
