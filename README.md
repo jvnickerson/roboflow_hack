@@ -56,14 +56,17 @@ gcloud run deploy vision --source . --region us-east1 \
   buildpacks before switching to the Dockerfile. Otherwise gcloud stops with
   "Base image is not supported for services built from Dockerfile". Hit on
   the first Dockerfile deploy of `vision`.
-- **`--memory=2Gi` is not optional.** `sweep_pass` holds one decoded frame
-  per camera plus the previous pass's arrays for the diff, roughly 250 MB per
-  set at ~963 cams. On Cloud Run's 512 MiB default the container is
-  OOM-killed mid-pass (`Memory limit of 512 MiB exceeded with 741 MiB used`)
-  and restarts in a loop every few seconds, so `sweep_loop` never finishes a
-  pass and `scores.json` silently never updates. The page still serves, which
-  is what makes this easy to miss: check that `scores.json` actually changes,
-  not that the site loads.
+- **`--memory=2Gi` is now just headroom.** Before `74df75c`, `sweep_pass`
+  retained a full-res frame per camera across passes and the container was
+  OOM-killed mid-pass on Cloud Run's 512 MiB default
+  (`Memory limit of 512 MiB exceeded with 741 MiB used`), restarting every
+  few seconds. Peak is ~312 MB since the thumbnail cache. The flag costs
+  nothing to keep and covers the cam count growing.
+- **`/healthz` is unreachable in production.** Google's edge answers it with
+  its own 404 before the request reaches the container: no Cloud Run trace
+  header on the response, reproduced from a laptop, from Cloud Shell, and on
+  both the project-number and hashed service URLs. `/data/*` reaches the app
+  normally, so it is specific to that path. Do not wire a health check to it.
 - `Dockerfile` builds the image; `.dockerignore` controls its contents.
   `.gcloudignore` separately controls what gets **uploaded** to Cloud Build.
   Without it gcloud falls back to `.gitignore`, which does not exclude
@@ -77,6 +80,37 @@ gcloud run deploy vision --source . --region us-east1 \
 Measured sweep timing, if `--loop` cadence needs tuning: ~21 s/pass on an M5
 laptop, ~33-39 s/pass in Cloud Shell (2 vCPU). The limit is CPU spent on
 image decode, so more bandwidth does not help.
+
+### How the sweep fails, and how to tell
+
+Both failures hit so far leave `/` and `/data/*` returning 200 while
+`scores.json` quietly stops changing. `sweep_loop` catches every exception
+and sleeps, and Python block-buffers stdout in a container, so the logs stay
+silent too. The site looks completely healthy.
+
+1. **OOM.** Container killed mid-pass, restarting every few seconds. Fixed at
+   the source in `74df75c`; `--memory=2Gi` covers the rest.
+2. **Call-site drift.** `server.py` passed `prev_arrays=` after `74df75c`
+   renamed the parameter to `prev_thumbs`, so every pass raised `TypeError`
+   into the bare `except` and no scores were ever written.
+
+The check that catches both: hash `data/sweep/scores.json` off the live URL
+twice, a few minutes apart, and confirm it changed. Never take a 200 on `/`
+as evidence the sweep is running.
+
+First churn values are always null. A fresh container has no previous pass to
+diff against, so pass one writes `churn: null` for every camera and pass two
+is the first with real numbers. Two nulls in a row means something is wrong.
+
+### What is actually deployed
+
+The live service is built from a hand-assembled copy in Cloud Shell
+(`~/vision`). The repo is private and Cloud Shell cannot clone it, so those
+files were written there by hand. As of this commit the running revision is
+`vision-00004-nkx`, which predates `74df75c` and still carries the old
+`sweep.py` plus its
+matching `server.py`. Re-bundle and redeploy to pick up repo changes; the
+deployed artifact does not track `main`.
 
 ## Inquiry ledger
 

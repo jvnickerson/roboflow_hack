@@ -34,7 +34,7 @@ def sweep_loop() -> None:
     prev: dict = {}
     while True:
         try:
-            scores, prev = sweep.sweep_pass(online, workers=20, prev_arrays=prev)
+            scores, prev = sweep.sweep_pass(online, workers=20, prev_thumbs=prev)
             sweep.SCORES.write_text(json.dumps(scores))
         except Exception as exc:  # keep the loop alive across transient failures
             print(f"sweep pass failed: {exc}")
