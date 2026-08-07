@@ -14,6 +14,13 @@ Per camera it computes:
 This is the peripheral tier: it ranks all 966 continuously for free, so
 detection (detect.py) can be spent only on the salient few.
 
+Memory note: only a small grayscale thumbnail is retained between passes
+for the churn diff (THUMB_SIZE, uint8) — not the full-res RGB float32
+frame. At ~963 cams that's the difference between a multi-hundred-MB
+resident cache (which OOM-kills a default Cloud Run container) and one
+that fits in a few MB. Full-res arrays are used transiently for
+colorfulness and then dropped every pass.
+
 Output: data/sweep/scores.json — [{slug, id, name, area, lat, lng, ts,
 colorfulness, churn}]. control.html merges it with leaderboard.json.
 Latest JPEGs kept in data/sweep/latest/<slug>.jpg (overwritten each pass).
@@ -43,6 +50,8 @@ SCORES = SWEEP / "scores.json"
 TS_BAND = 0.08  # crop this fraction off the top: burned-in timestamp
 SERVICE_COLORFULNESS = 6.0  # below this it's the gray "being serviced" card
                             # (card measures ~2; grayest real street ~11)
+THUMB_SIZE = (64, 44)  # cached-for-churn thumbnail: ~2.8KB uint8 vs ~1MB
+                       # for a full-res float32 RGB frame (~350x smaller)
 
 
 def fetch(cam: dict) -> tuple[dict, bytes | None]:
@@ -61,31 +70,40 @@ def to_array(data: bytes) -> np.ndarray | None:
         return None
 
 
-def churn_pct(prev: np.ndarray, curr: np.ndarray) -> float | None:
-    if prev.shape != curr.shape:
+def make_thumb(arr: np.ndarray) -> np.ndarray:
+    """Grayscale uint8, timestamp band cropped, downsampled to THUMB_SIZE.
+    This — not the full-res array — is what gets retained across passes."""
+    cut = int(arr.shape[0] * TS_BAND)
+    gray = arr[cut:].mean(axis=2).astype(np.uint8)
+    small = Image.fromarray(gray).resize(THUMB_SIZE, Image.BILINEAR)
+    return np.asarray(small, dtype=np.uint8)
+
+
+def churn_pct(prev_thumb: np.ndarray, curr_thumb: np.ndarray) -> float | None:
+    if prev_thumb.shape != curr_thumb.shape:
         return None
-    cut = int(curr.shape[0] * TS_BAND)
-    a, b = prev[cut:].mean(axis=2), curr[cut:].mean(axis=2)
-    return float(np.abs(a - b).mean() / 255.0 * 100.0)
+    diff = np.abs(prev_thumb.astype(np.int16) - curr_thumb.astype(np.int16))
+    return float(diff.mean() / 255.0 * 100.0)
 
 
-def sweep_pass(cams: list[dict], workers: int, prev_arrays: dict) -> tuple[list[dict], dict]:
+def sweep_pass(cams: list[dict], workers: int, prev_thumbs: dict) -> tuple[list[dict], dict]:
     ts = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     LATEST.mkdir(parents=True, exist_ok=True)
-    scores, arrays = [], {}
+    scores, thumbs = [], {}
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for cam, data in pool.map(fetch, cams):
             if data is None:
                 continue
-            arr = to_array(data)
+            arr = to_array(data)  # full-res float32 — transient, used below then dropped
             if arr is None:
                 continue
             s = slug(cam)
             color = colorfulness_arr(arr)
             serviced = color < SERVICE_COLORFULNESS
-            if not serviced:
-                arrays[s] = arr  # only real frames participate in churn
+            thumb = None if serviced else make_thumb(arr)
+            if thumb is not None:
+                thumbs[s] = thumb  # only ~2.8KB retained, not the ~1MB source array
             (LATEST / f"{s}.jpg").write_bytes(data)
             scores.append({
                 "slug": s,
@@ -97,13 +115,13 @@ def sweep_pass(cams: list[dict], workers: int, prev_arrays: dict) -> tuple[list[
                 "ts": ts,
                 "serviced": serviced,
                 "colorfulness": round(color, 1),
-                "churn": (None if serviced or s not in prev_arrays
-                          else round(churn_pct(prev_arrays[s], arr) or 0.0, 2)),
+                "churn": (None if thumb is None or s not in prev_thumbs
+                          else round(churn_pct(prev_thumbs[s], thumb) or 0.0, 2)),
             })
     got_churn = sum(1 for s in scores if s["churn"] is not None)
     print(f"pass done in {time.time()-t0:.0f}s: {len(scores)}/{len(cams)} cams fetched, "
           f"{got_churn} with churn")
-    return scores, arrays
+    return scores, thumbs
 
 
 def main() -> None:
