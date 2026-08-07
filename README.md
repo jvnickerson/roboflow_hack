@@ -34,6 +34,37 @@ export ROBOFLOW_API_KEY=...                        # app.roboflow.com -> Setting
   borough filter, dissolves. Serve with `python3 -m http.server 8123`.
 - `robo.py` — minimal Roboflow smoke test (their soccer demo).
 
+## Deploy (Cloud Run)
+
+```bash
+./deploy.sh                      # deploys, then curls the routes to confirm
+SERVICE=vision REGION=us-east1 ./deploy.sh
+```
+
+Or by hand:
+
+```bash
+gcloud run deploy vision --source . --region us-east1 \
+  --allow-unauthenticated --min-instances=1 --no-cpu-throttling
+```
+
+- **Both flags are required.** Cloud Run throttles CPU to ~0 between requests
+  and scales to zero when idle; either one stalls or kills `server.py`'s
+  background sweep thread.
+- `Dockerfile` builds the image; `.dockerignore` controls its contents.
+  `.gcloudignore` separately controls what gets **uploaded** to Cloud Build.
+  Without it gcloud falls back to `.gitignore`, which does not exclude
+  `data/sweep/latest/` (~28 MB regenerated every pass).
+- `control.html` loads camera frames browser-side straight from DOT, so the
+  service never proxies imagery. Only the page and the JSON are served.
+- Only `data/cameras.json` is required at boot. `leaderboard.json`,
+  `pedestrian_cams.json`, and `sweep/scores.json` each load inside a
+  `try/catch`, so a deploy missing them still boots with reduced function.
+
+Measured sweep timing, if `--loop` cadence needs tuning: ~21 s/pass on an M5
+laptop, ~33-39 s/pass in Cloud Shell (2 vCPU). The limit is CPU spent on
+image decode, so more bandwidth does not help.
+
 ## Inquiry ledger
 
 `inquiry/` binds `~/Dropbox/projects/inquiry_kernel` (sys.path import, never

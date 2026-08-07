@@ -1,0 +1,21 @@
+# Controls what `gcloud run deploy --source .` uploads to Cloud Build.
+# Without this file gcloud falls back to .gitignore, which does not exclude
+# data/sweep/latest (~28 MB of JPEGs) and re-uploads it on every deploy.
+# .dockerignore governs the image; this governs the upload.
+
+.git/
+.gitignore
+.venv/
+__pycache__/
+.env
+.claude/
+
+# Capture artifacts. sweep.py rewrites all ~963 of these every pass and
+# nothing reads them back, so they never need to leave the laptop.
+data/frames/
+data/sweep/latest/
+data/detections/
+*.jpg
+*.png
+
+lens.html
