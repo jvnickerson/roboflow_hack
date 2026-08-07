@@ -20,6 +20,7 @@ from flask import Flask, send_from_directory
 
 import cams
 import sweep
+import switcher
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SWEEP_INTERVAL = 120  # seconds between full-city passes
@@ -46,6 +47,11 @@ def index():
     return send_from_directory(ROOT, "control.html")
 
 
+@app.route("/channel")
+def channel():
+    return send_from_directory(ROOT, "channel.html")
+
+
 @app.route("/data/<path:path>")
 def data(path):
     return send_from_directory(os.path.join(ROOT, "data"), path)
@@ -58,4 +64,5 @@ def healthz():
 
 if __name__ == "__main__":
     threading.Thread(target=sweep_loop, daemon=True).start()
+    threading.Thread(target=switcher.switcher_loop, args=("empty",), daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), threaded=True)

@@ -10,3 +10,5 @@ lens.html
 # these two lines after the event if you want them back in the public repo.
 inquiry/
 ledgers/
+data/sweep/latest/
+data/channel/empty.json

@@ -17,6 +17,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+: "${ROBOFLOW_API_KEY:?export ROBOFLOW_API_KEY first}"
+
 SERVICE="${SERVICE:-vision}"
 REGION="${REGION:-us-east1}"
 
@@ -29,6 +31,7 @@ gcloud run deploy "$SERVICE" \
   --clear-base-image \
   --memory=2Gi \
   --cpu=2 \
+  --set-env-vars "ROBOFLOW_API_KEY=${ROBOFLOW_API_KEY}" \
   --quiet
 
 URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
