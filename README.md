@@ -1,140 +1,226 @@
-# roboflow_hack — NYC Vision Hack v.2
+# NYC Channels
 
-Live NYC camera analysis: 968 public NYC DOT cams → Roboflow detection →
-complexity/movement metrics, with the inquiry ledger tracking goals and
-goal edits as the night evolves.
+**Television for a city that is already being watched.** New York points 966 public
+cameras at itself. This turns them into channels: one camera on screen at a time,
+chosen live by a machine looking for a specific condition, cutting away the moment
+the condition breaks.
 
-## The spine
+Not a dashboard. A dashboard shows you everything at once and asks you to find the
+signal. A channel has already decided what is worth looking at, and tells you why.
 
-```bash
-.venv/bin/python cams.py --refresh                 # registry -> data/cameras.json (968 cams, lat/lng)
-.venv/bin/python poll.py --grep "7 ave" --minutes 10 --interval 4
-export ROBOFLOW_API_KEY=...                        # app.roboflow.com -> Settings -> API Keys
-.venv/bin/python detect.py --follow                # run beside poll.py; detections -> data/detections/
-.venv/bin/python metrics.py --sort motion_entropy  # leaderboard -> data/leaderboard.json
+**On air tonight: EMPTY NEW YORK.** The city that never sleeps, shown with nobody in
+it — live, on the exact midtown cameras that are normally packed. A scene qualifies
+when a person detector finds zero people in it. When someone walks into frame, the
+channel cuts away.
+
+**Second channel: WATER ON THE LENS.** Cameras with rain on their own glass. It rained
+hard during the build, and a wet lens turns a traffic camera into something closer to
+a painting.
+
+```
+/channel                  EMPTY NEW YORK      (live switcher, Roboflow qualifier)
+/channel?channel=water    WATER ON THE LENS   (wetness-ranked, no API calls)
+/                         the control grid    (the instrument behind the channels)
 ```
 
-- `cams.py` — fetch/filter the DOT registry (`--borough`, `--grep`; other cam
-  sources can merge in with the same shape).
-- `poll.py` — snapshot cameras on an interval; frames in
-  `data/frames/<slug>/`, capture log in `data/frames/index.jsonl`.
-- `detect.py` — Roboflow serverless on each new frame. Model from
-  `ROBOFLOW_MODEL` (default `yolov8n-640`, hosted COCO; swap in a Universe
-  model id if that alias 401s).
-- `metrics.py` — per-camera scores: **colorfulness** (Hasler–Süsstrunk, needs
-  frames only), **class entropy** (variety of objects), **motion entropy**
-  (variety of movement *directions* from matched detections across
-  consecutive frames — the "most kinds of movement" measure).
-- `sweep.py` — the peripheral tier: all 966 cams in ~4 s/pass (threaded,
-  no API calls), scoring **churn** (frame differencing, timestamp band
-  cropped, "being serviced" cards filtered) + colorfulness city-wide into
-  `data/sweep/scores.json`. Run `--loop` during the event; spend detection
-  only on what it surfaces.
-- `control.html` — the control center: live grid ranked by any score,
-  borough filter, dissolves. Serve with `python3 -m http.server 8123`.
-- `robo.py` — minimal Roboflow smoke test (their soccer demo).
+---
+
+## How it works
+
+```
+Cloud Run container
+│
+├─ sweep_loop()      every 120s ─► data/sweep/scores.json    churn + colour, all 966 cams
+├─ switcher_loop()   every 6s   ─► data/channel/empty.json   who is on air, and why
+│      └─ Roboflow serverless yolov8n-640, given the DOT image URL directly
+│
+├─ /          control.html    the grid
+├─ /channel   channel.html    the player
+├─ /data/…    state + scores
+└─ /healthz   (see the deploy notes — Google's edge intercepts this path)
+
+Browser
+├─ polls the channel state every 2s
+└─ <img src="dot-camera-url"> — imagery goes straight from the city to the viewer
+```
+
+**The service never touches a photograph.** Roboflow fetches frames from the DOT URL
+itself, and the browser loads them directly. The container moves JSON only.
+
+### Two tiers of attention
+
+Detection costs money per call; pixel arithmetic is free. So the system looks the way
+eyes do — a cheap wide periphery and an expensive narrow fovea.
+
+- **Periphery** (`sweep.py`): all 966 cameras, ~21 s per pass, no API calls. Scores
+  *churn* (how much the frame changed since last pass) and *colourfulness*.
+- **Fovea** (`switcher.py`, `detect.py`): Roboflow object detection, spent only on the
+  handful of cameras a channel actually cares about.
+
+Running detection on all 966 at sweep cadence would be ~870,000 calls an hour. The
+switcher uses about 2,400.
+
+### The measures
+
+| Measure | What it is | Cost |
+|---|---|---|
+| **churn** | mean pixel difference vs. the same camera's previous pass | free |
+| **colourfulness** | Hasler–Süsstrunk; finds neon and signage after dark | free |
+| **motion entropy** | Shannon entropy over the *directions* objects moved — not how much movement, but how many **kinds**. A one-way avenue scores low; a crossroads with turning traffic and two crosswalks scores high. | detection |
+| **wetness** | mid-scale vs. fine-scale image energy where the frame held still | free |
+| **persons** | Roboflow `yolov8n-640`, confidence ≥ 0.5 | detection |
+
+**Wetness, since it is the least obvious.** A droplet on a lens is itself a lens: it
+defocuses whatever is behind it and refracts point lights into discs, moving image
+energy out of fine detail and into mid-scale blobs. Unlike traffic, it does not move
+between frames. So `wet.py` takes a temporal median over several frames — traffic
+averages away, droplets persist — and measures the blob-to-detail ratio in the parts
+of the frame that stayed still.
+
+**It only half works, and the docstring says so.** The ranking does put the most
+droplet-covered lenses on top, but separation from merely-rainy scenes is weak,
+because in a citywide downpour nearly every lens is wet — there is barely a dry class
+left to separate against. Single-frame features (bloom, blur, bokeh area) failed
+completely: at 352×240 at night they measure *"it is raining"*, not *"it is on the
+glass."* Proving it properly needs a dry-night baseline per camera, which one evening
+did not provide.
+
+### One thing the data said
+
+At 21:51 UTC the National Weather Service station in Central Park reported **Clear.**
+Every camera on 42nd Street was streaming with water at that moment. The station did
+not report Heavy Rain until 22:13 UTC.
+
+The station is not broken — it is one instrument, four miles from midtown, reporting
+hourly. There are 966 lenses. Water on the glass is a weather reading, and it arrives
+first.
+
+---
+
+## Run it
+
+```bash
+python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
+export ROBOFLOW_API_KEY=...            # app.roboflow.com → Settings → API Keys
+./.venv/bin/python server.py           # http://localhost:8080/channel
+```
+
+Without a key the switcher still runs, in degraded mode: timed rotation, no detection.
+The screen is never blank.
+
+```bash
+./.venv/bin/python cams.py --refresh              # registry → data/cameras.json
+./.venv/bin/python sweep.py --loop                # citywide churn + colour
+./.venv/bin/python wet.py --grep "42 st" --top 6  # wetness → water channel + composite
+./.venv/bin/python metrics.py --sort motion_entropy
+```
+
+| File | What it does |
+|---|---|
+| `cams.py` | the 966-camera registry, filterable by borough or name |
+| `sweep.py` | citywide churn + colourfulness, no API calls |
+| `switcher.py` | picks who is on air and why; writes the channel state |
+| `channel.html` | the player — reads only the state file |
+| `control.html` | the grid, ranked by any measure |
+| `wet.py` | wetness scoring, the water channel, and the composite |
+| `poll.py` / `detect.py` / `metrics.py` | capture, detect, and score over time |
+| `exploded.py` | pulls detected objects outside the frame with leader lines |
+
+---
 
 ## Deploy (Cloud Run)
 
 ```bash
-./deploy.sh                      # deploys, then curls the routes to confirm
+export ROBOFLOW_API_KEY=...
+./deploy.sh                          # deploys, then curls the routes to confirm
 SERVICE=vision REGION=us-east1 ./deploy.sh
 ```
 
-Or by hand:
+Hard-won operational notes, each one paid for tonight:
 
-```bash
-gcloud run deploy vision --source . --region us-east1 \
-  --allow-unauthenticated --min-instances=1 --no-cpu-throttling \
-  --clear-base-image --memory=2Gi --cpu=2
-```
-
-- **Both scaling flags are required.** Cloud Run throttles CPU to ~0 between
-  requests and scales to zero when idle; either one stalls or kills
-  `server.py`'s background sweep thread.
-- **`--clear-base-image` is required** if the service was ever deployed from
-  buildpacks before switching to the Dockerfile. Otherwise gcloud stops with
-  "Base image is not supported for services built from Dockerfile". Hit on
-  the first Dockerfile deploy of `vision`.
-- **`--memory=2Gi` is now just headroom.** Before `74df75c`, `sweep_pass`
-  retained a full-res frame per camera across passes and the container was
-  OOM-killed mid-pass on Cloud Run's 512 MiB default
-  (`Memory limit of 512 MiB exceeded with 741 MiB used`), restarting every
-  few seconds. Peak is ~312 MB since the thumbnail cache. The flag costs
-  nothing to keep and covers the cam count growing.
-- **`/healthz` is unreachable in production.** Google's edge answers it with
-  its own 404 before the request reaches the container: no Cloud Run trace
-  header on the response, reproduced from a laptop, from Cloud Shell, and on
-  both the project-number and hashed service URLs. `/data/*` reaches the app
-  normally, so it is specific to that path. Do not wire a health check to it.
-- `Dockerfile` builds the image; `.dockerignore` controls its contents.
-  `.gcloudignore` separately controls what gets **uploaded** to Cloud Build.
-  Without it gcloud falls back to `.gitignore`, which does not exclude
-  `data/sweep/latest/` (~28 MB regenerated every pass).
-- `control.html` loads camera frames browser-side straight from DOT, so the
-  service never proxies imagery. Only the page and the JSON are served.
-- Only `data/cameras.json` is required at boot. `leaderboard.json`,
-  `pedestrian_cams.json`, and `sweep/scores.json` each load inside a
-  `try/catch`, so a deploy missing them still boots with reduced function.
-
-Measured sweep timing, if `--loop` cadence needs tuning: ~21 s/pass on an M5
-laptop, ~33-39 s/pass in Cloud Shell (2 vCPU). The limit is CPU spent on
-image decode, so more bandwidth does not help.
+- **Both scaling flags are required.** Cloud Run throttles CPU to ~0 between requests
+  and scales to zero when idle; either one stalls or kills the background loops.
+- **`--clear-base-image` is required** if the service was ever deployed from buildpacks
+  before switching to the Dockerfile, or gcloud stops with "Base image is not supported
+  for services built from Dockerfile."
+- **`--memory=2Gi` is now just headroom.** Before `74df75c`, `sweep_pass` retained a
+  full-resolution frame per camera across passes and the container was OOM-killed
+  mid-pass on the 512 MiB default (`Memory limit of 512 MiB exceeded with 741 MiB
+  used`), restarting every few seconds. Peak is ~312 MB since the thumbnail cache.
+- **`/healthz` is unreachable in production.** Google's edge answers it with its own
+  404 before the request reaches the container — reproduced from a laptop, from Cloud
+  Shell, and on both URL forms. `/data/*` reaches the app normally. Do not wire a
+  health check to it.
+- `.dockerignore` controls the image; `.gcloudignore` separately controls what gets
+  **uploaded**. Without the latter, gcloud falls back to `.gitignore`, which does not
+  exclude ~28 MB of regenerated JPEGs.
+- Only `data/cameras.json` is required at boot. Everything else loads inside a
+  `try/catch`, so a partial deploy still boots with reduced function.
 
 ### How the sweep fails, and how to tell
 
-Both failures hit so far leave `/` and `/data/*` returning 200 while
-`scores.json` quietly stops changing. `sweep_loop` catches every exception
-and sleeps, and Python block-buffers stdout in a container, so the logs stay
-silent too. The site looks completely healthy.
+Both failures hit tonight left `/` and `/data/*` returning 200 while `scores.json`
+quietly stopped changing. `sweep_loop` catches every exception and sleeps, and Python
+block-buffers stdout in a container, so the logs stay silent too. **The site looks
+completely healthy while the data is frozen.**
 
-1. **OOM.** Container killed mid-pass, restarting every few seconds. Fixed at
-   the source in `74df75c`; `--memory=2Gi` covers the rest.
-2. **Call-site drift.** `server.py` passed `prev_arrays=` after `74df75c`
-   renamed the parameter to `prev_thumbs`, so every pass raised `TypeError`
-   into the bare `except` and no scores were ever written.
+1. **OOM** — container killed mid-pass, restarting every few seconds.
+2. **Call-site drift** — `server.py` passed `prev_arrays=` after the parameter was
+   renamed to `prev_thumbs`, so every pass raised `TypeError` into a bare `except` and
+   nothing was ever written.
 
-The check that catches both: hash `data/sweep/scores.json` off the live URL
-twice, a few minutes apart, and confirm it changed. Never take a 200 on `/`
-as evidence the sweep is running.
+The check that catches both: hash `data/sweep/scores.json` off the live URL twice, a
+few minutes apart, and confirm it changed. Never take a 200 on `/` as evidence that
+anything is running.
 
-First churn values are always null. A fresh container has no previous pass to
-diff against, so pass one writes `churn: null` for every camera and pass two
-is the first with real numbers. Two nulls in a row means something is wrong.
+First churn values are always `null` — a fresh container has no previous pass to diff
+against. Two nulls in a row means something is wrong.
 
-### What is actually deployed
+### The deployed artifact does not track `main`
 
-The live service is built from a hand-assembled copy in Cloud Shell
-(`~/vision`). The repo is private and Cloud Shell cannot clone it, so those
-files were written there by hand. As of this commit the running revision is
-`vision-00004-nkx`, which predates `74df75c` and still carries the old
-`sweep.py` plus its
-matching `server.py`. Re-bundle and redeploy to pick up repo changes; the
-deployed artifact does not track `main`.
+The live service was built from a hand-assembled copy in Cloud Shell (`~/vision`),
+because the repo was private and Cloud Shell could not clone it. **The repo is public
+now, so that constraint is gone** — clone it in Cloud Shell and deploy from the clone
+rather than re-copying files by hand. Until that happens, assume the running revision
+is behind `main` and re-bundle before trusting any change to be live.
 
-## Inquiry ledger
+---
 
-`inquiry/` binds `~/Dropbox/projects/inquiry_kernel` (sys.path import, never
-copied). File goals ex ante, log goal edits as we pivot:
+## Data, and looking away
 
-```python
-import inquiry
-inquiry.goal("...", move="...", prediction="...", stop_loss="...")
-inquiry.edit_goal("old goal", "new goal", why="...")
-inquiry.probe("what we did", warrant_id="W-...", result="...")
-inquiry.status()   # fold ledgers/ -> metrics
-inquiry.lens()     # interactive graph -> lens.html
-```
+Everything here comes from `https://webcams.nyctmc.org/api/cameras` — the city's own
+public traffic-camera registry. No key, no scraping, no authentication. The handbook
+hands out this endpoint as the event's quickstart source.
 
-Opening warrant: `W-2a614bc60e41` — live detections on an NYC feed by end of
-night; stop-loss: two dry hours → recorded footage.
+- **352×240.** Faces and licence plates are not resolvable at this resolution, and
+  nothing here attempts to resolve them.
+- **No imagery is stored or proxied by the service.** Frames go from the city to the
+  viewer's browser; Roboflow fetches them from the same public URL.
+- **Detections are used only to look away.** The person detector exists so the channel
+  can leave occupied scenes. It counts people in order to avoid showing them.
+- Sources with terms of use prohibiting automated capture (EarthCam and similar) were
+  checked and deliberately excluded, even where the imagery was better. See
+  [`BIRD_CAMS.md`](BIRD_CAMS.md) for that survey.
 
-## Cameras
+## What came before tonight
 
-NYC DOT: `https://webcams.nyctmc.org/api/cameras` — open JSON, no key.
-352×240 JPEG per camera, refreshes every ~2 s, timestamp burned in.
+Built before the 4 PM start: the registry fetch, the citywide sweep, the metrics, the
+Flask scaffold, and the control grid. Built tonight: the channel concept and switcher,
+the Roboflow qualifier, the channel player, the wetness measure and water channel, and
+the Cloud Run deployment.
 
-Bird cams around the city, with live status checked per cam and raw endpoints:
-[`BIRD_CAMS.md`](BIRD_CAMS.md). Six were streaming on 2026-08-07; two expose an
-unauthenticated `.m3u8` that ffmpeg or OpenCV reads directly, the rest are on
-YouTube.
+## What is next
+
+- **New York in Motion** — a channel of cameras that move. Designed, not built: every
+  one of the 966 DOT cameras is fixed-mount, and no public moving-camera feed was
+  sourced in time. It is waiting on a source, not on code.
+- **Free channels.** Neon (colourfulness) and Deserted (inverted churn) need no API
+  calls at all — both measures are already computed citywide every pass. Deserted is
+  also the honest understudy for Empty: no motion is a decent proxy for no people, and
+  it keeps working if the detector is unavailable.
+- **Sodium and LED.** Classify streetlight colour temperature from the hue of bright
+  pixels. New York replaced amber sodium lamps with cold white LEDs block by block, so
+  a warm/cool map of the city is a map of which neighbourhoods got money, and when.
+- **The multi-panel grammar.** The state file already publishes `on_air`, `previous`,
+  and `queue`, so a split-screen composition is a front-end change with no server work.
+  `wet.py`'s composite is a first sketch of it.
