@@ -25,7 +25,10 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TICK = 6            # loop interval; DOT stills refresh ~every 2 s, faster sampling wastes calls
 POOL_PER_TICK = 3   # pool cams sampled per tick, round-robin
-CONF = 0.5          # confidence floor for counting a person (public-display threshold)
+CONF = 0.15         # confidence floor for counting a person. Night at 352x240 puts real
+                    # Times Square crowds at 0.16-0.39 (measured 2026-08-07 7 PM, rain);
+                    # 0.5 would caption crowds as empty. Daytime can afford 0.5.
+API_CONF = 0.05     # ask the API for everything; the hosted default (0.4) hides night people
 QUALIFY_STREAK = 2  # consecutive person-free samples to qualify; one occupied sample re-arms
 MIN_DWELL = 12      # min seconds on air before a rotation (never blocks a disqualification cut)
 MAX_DWELL = 45      # rotate to the next qualified cam even if the current one is still empty
@@ -33,7 +36,7 @@ COOLDOWN = 120      # a cam that leaves the air cannot return for this long
 FAIL_LIMIT = 3      # consecutive fetch/API failures before a cam is benched
 FAIL_BENCH = 600    # bench duration in seconds
 
-MODEL = os.environ.get("ROBOFLOW_MODEL", "yolov8n-640")  # Roboflow-hosted COCO
+MODEL = os.environ.get("ROBOFLOW_MODEL", "coco/3")  # hosted COCO; the "yolov8n-640" alias 404s over raw HTTP
 PERSON_CLASSES = {"person"}  # add "car", "truck", "bus" here to count vehicles too
 
 CHANNELS = {
@@ -51,7 +54,7 @@ def count_persons(image_url: str, api_key: str) -> int | None:
     """
     url = (
         f"https://serverless.roboflow.com/{MODEL}"
-        f"?api_key={api_key}&image={urllib.parse.quote(image_url, safe='')}"
+        f"?api_key={api_key}&image={urllib.parse.quote(image_url, safe='')}&confidence={API_CONF}"
     )
     resp = requests.post(url, timeout=10)
     data = resp.json()  # non-JSON raises -> caller counts a failure
