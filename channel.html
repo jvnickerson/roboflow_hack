@@ -75,7 +75,7 @@ const [TITLE, SCANNING] = TITLES[CHANNEL] || [CHANNEL.toUpperCase(), 'scanning']
 const $ = id => document.getElementById(id);
 let frames = [$('fa'), $('fb')], front = 0;
 let slug = null, since = null, serverNow = null, localAt = 0, mode = 'degraded';
-let lastGood = false;
+let lastGood = false, metricLabel = null;
 
 $('chan').textContent = TITLE;
 
@@ -113,7 +113,10 @@ function paint() {
   if (stale) {
     $('status').textContent = 'switcher not responding — holding last frame';
   } else if (mode === 'live') {
-    $('status').innerHTML = `empty for <b>${clock(elapsed())}</b>`;
+    // channels that carry their own measure (water: wetness) label themselves;
+    // empty falls back to the how-long-empty counter
+    $('status').innerHTML = metricLabel
+      ? `<b>${metricLabel}</b>` : `empty for <b>${clock(elapsed())}</b>`;
   } else {
     $('status').textContent = SCANNING;
   }
@@ -128,6 +131,7 @@ async function tick() {
     if (air) {
       mode = s.mode || 'degraded';
       serverNow = s.ts; localAt = Date.now();
+      metricLabel = air.metric_label || null;
       if (air.slug !== slug) {           // the cut
         slug = air.slug;
         since = air.since;

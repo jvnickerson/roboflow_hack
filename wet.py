@@ -27,6 +27,7 @@ import argparse
 import concurrent.futures as cf
 import io
 import json
+import os
 import time
 from pathlib import Path
 
@@ -222,6 +223,38 @@ def main() -> None:
     print(f"\n{'wetness':>8}  camera")
     for r in rows[:12]:
         print(f"{r['wetness']:8.3f}  {r['cam']['name']}")
+
+    # channel state for the shared player — rides the existing /channel route
+    # (SPEC state-file contract), so this is a demo fallback that needs no
+    # server.py edit and no Roboflow call: browser pulls DOT frames directly.
+    if rows:
+        best = rows[0]
+        now = int(time.time())
+        chan = {
+            "channel": "water", "mode": "live", "ts": now, "tick": 1,
+            "on_air": {
+                "slug": slug(best["cam"]), "name": best["cam"]["name"],
+                "area": best["cam"].get("area"), "imageUrl": best["cam"]["imageUrl"],
+                "since": now, "persons": 0, "reason": "qualified",
+                "metric_label": f"wetness {best['wetness']:.3f}",
+            },
+            "previous": None,
+            "queue": [{
+                "slug": slug(r["cam"]), "name": r["cam"]["name"],
+                "area": r["cam"].get("area"), "imageUrl": r["cam"]["imageUrl"],
+                "persons": 0, "streak": 2,
+                "metric_label": f"wetness {r['wetness']:.3f}",
+            } for r in rows[1:12]],
+            "stats": {"list_size": len(rows), "qualified_now": len(rows),
+                      "api_calls": 0, "api_ok": True, "last_error": None,
+                      "observed": wx.get("text")},
+        }
+        cdir = DATA / "channel"
+        cdir.mkdir(parents=True, exist_ok=True)
+        tmp = cdir / "water.json.tmp"
+        tmp.write_text(json.dumps(chan, indent=1))
+        os.replace(tmp, cdir / "water.json")   # atomic; player never reads torn JSON
+        print(f"channel state -> data/channel/water.json (on air: {best['cam']['name']})")
 
     # ranked list for the live piece (water.html) — no image data, just where
     ranked = [{
