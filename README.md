@@ -46,7 +46,7 @@ Or by hand:
 ```bash
 gcloud run deploy vision --source . --region us-east1 \
   --allow-unauthenticated --min-instances=1 --no-cpu-throttling \
-  --clear-base-image
+  --clear-base-image --memory=2Gi --cpu=2
 ```
 
 - **Both scaling flags are required.** Cloud Run throttles CPU to ~0 between
@@ -56,6 +56,14 @@ gcloud run deploy vision --source . --region us-east1 \
   buildpacks before switching to the Dockerfile. Otherwise gcloud stops with
   "Base image is not supported for services built from Dockerfile". Hit on
   the first Dockerfile deploy of `vision`.
+- **`--memory=2Gi` is not optional.** `sweep_pass` holds one decoded frame
+  per camera plus the previous pass's arrays for the diff, roughly 250 MB per
+  set at ~963 cams. On Cloud Run's 512 MiB default the container is
+  OOM-killed mid-pass (`Memory limit of 512 MiB exceeded with 741 MiB used`)
+  and restarts in a loop every few seconds, so `sweep_loop` never finishes a
+  pass and `scores.json` silently never updates. The page still serves, which
+  is what makes this easy to miss: check that `scores.json` actually changes,
+  not that the site loads.
 - `Dockerfile` builds the image; `.dockerignore` controls its contents.
   `.gcloudignore` separately controls what gets **uploaded** to Cloud Build.
   Without it gcloud falls back to `.gitignore`, which does not exclude

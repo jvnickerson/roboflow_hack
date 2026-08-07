@@ -7,6 +7,11 @@
 # --clear-base-image is required once a service has been deployed from
 # buildpacks and then switches to a Dockerfile. Without it gcloud fails with
 # "Base image is not supported for services built from Dockerfile".
+#
+# --memory=2Gi is not optional. sweep_pass holds a decoded frame per camera
+# plus the previous pass's arrays for the diff, roughly 250 MB per set at
+# ~963 cams. On Cloud Run's 512 MiB default the container is OOM-killed
+# mid-pass and restarts in a loop, so scores.json never updates.
 
 set -euo pipefail
 
@@ -22,6 +27,8 @@ gcloud run deploy "$SERVICE" \
   --min-instances=1 \
   --no-cpu-throttling \
   --clear-base-image \
+  --memory=2Gi \
+  --cpu=2 \
   --quiet
 
 URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
