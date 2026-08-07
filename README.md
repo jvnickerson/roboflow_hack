@@ -25,6 +25,13 @@ export ROBOFLOW_API_KEY=...                        # app.roboflow.com -> Setting
   frames only), **class entropy** (variety of objects), **motion entropy**
   (variety of movement *directions* from matched detections across
   consecutive frames — the "most kinds of movement" measure).
+- `sweep.py` — the peripheral tier: all 966 cams in ~4 s/pass (threaded,
+  no API calls), scoring **churn** (frame differencing, timestamp band
+  cropped, "being serviced" cards filtered) + colorfulness city-wide into
+  `data/sweep/scores.json`. Run `--loop` during the event; spend detection
+  only on what it surfaces.
+- `control.html` — the control center: live grid ranked by any score,
+  borough filter, dissolves. Serve with `python3 -m http.server 8123`.
 - `robo.py` — minimal Roboflow smoke test (their soccer demo).
 
 ## Inquiry ledger

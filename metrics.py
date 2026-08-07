@@ -38,8 +38,11 @@ STILL_RADIUS = 3.0   # px; below this a matched object counts as "still"
 
 
 def colorfulness(path: Path) -> float:
+    return colorfulness_arr(np.asarray(Image.open(path).convert("RGB"), dtype=np.float32))
+
+
+def colorfulness_arr(arr: np.ndarray) -> float:
     """Hasler & Susstrunk (2003)."""
-    arr = np.asarray(Image.open(path).convert("RGB"), dtype=np.float32)
     r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
     rg = r - g
     yb = 0.5 * (r + g) - b

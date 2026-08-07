@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>life-as-art — NYC cam control center</title>
+<style>
+  :root {
+    --bg: #0b0e12; --panel: #141a22; --ink: #cfd8e3; --dim: #6b7a8d;
+    --accent: #ffd166; --line: #223041;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 13px/1.4 "SF Mono", Menlo, monospace; }
+  header {
+    display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
+    padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  h1 { font-size: 14px; font-weight: 600; letter-spacing: 1px; color: var(--accent); }
+  h1 span { color: var(--dim); font-weight: 400; }
+  label { display: flex; align-items: center; gap: 7px; color: var(--dim); white-space: nowrap; }
+  select, input[type=range] { accent-color: var(--accent); background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; font: inherit; }
+  .val { color: var(--ink); min-width: 3ch; }
+  #grid { display: grid; gap: 3px; padding: 3px; }
+  .cell { position: relative; aspect-ratio: 352/240; overflow: hidden; background: #000; }
+  .cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    transition: opacity 1.2s ease; }
+  .cell .back { opacity: 1; } .cell .front { opacity: 0; }
+  .cell .tag {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 6px;
+    background: rgba(11,14,18,.72); color: var(--ink); font-size: 10px;
+    display: flex; justify-content: space-between; opacity: 0; transition: opacity .2s;
+  }
+  .cell:hover .tag { opacity: 1; }
+  .tag b { color: var(--accent); font-weight: 400; }
+  .cell.expanded { grid-column: span 2; grid-row: span 2; }
+  footer { padding: 6px 16px; color: var(--dim); }
+</style>
+</head>
+<body>
+<header>
+  <h1>LIFE-AS-ART <span>/ nyc cam control center</span></h1>
+  <label>rank
+    <select id="rank">
+      <option value="shuffle">shuffle</option>
+      <option value="churn">city churn</option>
+      <option value="motion_entropy">kinds of movement</option>
+      <option value="class_entropy">object variety</option>
+      <option value="colorfulness">colorfulness</option>
+      <option value="pedestrian">pedestrian picks</option>
+    </select>
+  </label>
+  <label>borough
+    <select id="borough">
+      <option value="">all</option><option>Manhattan</option><option>Brooklyn</option>
+      <option>Queens</option><option>Bronx</option><option>Staten Island</option>
+    </select>
+  </label>
+  <label>grid <input id="size" type="range" min="2" max="7" value="5"><span class="val" id="sizeVal">5</span></label>
+  <label>refresh <input id="rate" type="range" min="2" max="20" value="4"><span class="val" id="rateVal">4s</span></label>
+  <label>dissolve <input id="dissolve" type="checkbox" checked></label>
+  <label><button id="reshuffle" style="font:inherit;background:var(--bg);color:var(--accent);border:1px solid var(--line);border-radius:4px;padding:2px 10px;cursor:pointer">redraw</button></label>
+</header>
+<div id="grid"></div>
+<footer id="status">loading registry…</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+let cams = [], scores = {}, peds = new Set(), timer = null;
+
+async function loadData() {
+  cams = (await (await fetch('data/cameras.json')).json())
+         .filter(c => String(c.isOnline).toLowerCase() === 'true');
+  try {
+    for (const s of await (await fetch('data/leaderboard.json')).json()) scores[s.slug] = s;
+  } catch (e) {}
+  try {
+    for (const p of await (await fetch('data/pedestrian_cams.json')).json()) peds.add(p.id);
+  } catch (e) {}
+  try {
+    for (const s of await (await fetch('data/sweep/scores.json')).json())
+      scores[s.slug] = Object.assign(scores[s.slug] || {}, s);
+  } catch (e) {}
+}
+
+const slug = c => c.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+$/,'').slice(0, 60);
+
+function pick() {
+  const n = +$('size').value, want = n * n, borough = $('borough').value, mode = $('rank').value;
+  let pool = borough ? cams.filter(c => c.area === borough) : cams.slice();
+  if (mode === 'pedestrian') {
+    pool = pool.filter(c => peds.has(c.id));
+  } else if (mode !== 'shuffle') {
+    pool.sort((a, b) => ((scores[slug(b)]?.[mode] ?? -1)) - ((scores[slug(a)]?.[mode] ?? -1)));
+    const measured = pool.filter(c => scores[slug(c)]);
+    const rest = pool.filter(c => !scores[slug(c)]);
+    shuffle(rest);
+    pool = measured.concat(rest);
+    return pool.slice(0, want);
+  }
+  shuffle(pool);
+  return pool.slice(0, want);
+}
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } }
+
+function build() {
+  const n = +$('size').value;
+  const grid = $('grid');
+  grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  grid.innerHTML = '';
+  const chosen = pick();
+  for (const cam of chosen) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const s = scores[slug(cam)];
+    const score = !s ? '' :
+      [s.churn != null && `chn ${s.churn}`, s.motion_entropy != null && `movH ${s.motion_entropy}`,
+       s.colorfulness != null && `clr ${s.colorfulness}`].filter(Boolean).join(' · ');
+    cell.innerHTML = `
+      <img class="back" src="${cam.imageUrl}?t=${Date.now()}">
+      <img class="front">
+      <div class="tag"><span>${cam.name}</span><b>${cam.area}${score ? ' · ' + score : ''}</b></div>`;
+    cell.onclick = () => cell.classList.toggle('expanded');
+    cell.dataset.url = cam.imageUrl;
+    grid.appendChild(cell);
+  }
+  $('status').textContent =
+    `${chosen.length} cams shown · ${cams.length} online · ranked by ${$('rank').value} · ${Object.keys(scores).length} cams measured (run poll.py + detect.py + metrics.py to measure more)`;
+  schedule();
+}
+
+function refresh() {
+  for (const cell of document.querySelectorAll('.cell')) {
+    const url = `${cell.dataset.url}?t=${Date.now()}`;
+    const front = cell.querySelector('.front'), back = cell.querySelector('.back');
+    const img = new Image();
+    img.onload = () => {
+      if ($('dissolve').checked) {
+        front.src = img.src; front.style.opacity = 1;
+        setTimeout(() => { back.src = img.src; front.style.opacity = 0; }, 1250);
+      } else { back.src = img.src; }
+    };
+    img.src = url;
+  }
+}
+
+function schedule() {
+  clearInterval(timer);
+  timer = setInterval(refresh, +$('rate').value * 1000);
+}
+
+$('size').oninput = () => { $('sizeVal').textContent = $('size').value; };
+$('size').onchange = build;
+$('rate').oninput = () => { $('rateVal').textContent = $('rate').value + 's'; };
+$('rate').onchange = schedule;
+$('rank').onchange = build;
+$('borough').onchange = build;
+$('reshuffle').onclick = build;
+
+loadData().then(build);
+</script>
+</body>
+</html>
