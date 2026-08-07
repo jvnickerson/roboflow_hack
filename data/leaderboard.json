@@ -1,0 +1,65 @@
+[
+ {
+  "slug": "7-ave---42-st",
+  "frames": 11,
+  "detections": 73,
+  "colorfulness": 22.3,
+  "class_entropy": 1.589,
+  "classes": {
+   "person": 39,
+   "car": 25,
+   "bus": 5,
+   "train": 2,
+   "bicycle": 1,
+   "truck": 1
+  },
+  "motion_entropy": 3.016,
+  "motion_bins": {
+   "NE": 9,
+   "S": 5,
+   "E": 5,
+   "N": 4,
+   "SW": 4,
+   "NW": 4,
+   "SE": 4,
+   "W": 3,
+   "still": 1
+  }
+ },
+ {
+  "slug": "central-park-west---86-st",
+  "frames": 11,
+  "detections": 26,
+  "colorfulness": 11.2,
+  "class_entropy": 1.323,
+  "classes": {
+   "car": 18,
+   "person": 4,
+   "bus": 3,
+   "truck": 1
+  },
+  "motion_entropy": 1.906,
+  "motion_bins": {
+   "still": 3,
+   "W": 2,
+   "N": 2,
+   "SW": 1
+  }
+ },
+ {
+  "slug": "canal-street---chrystie-street",
+  "frames": 11,
+  "detections": 10,
+  "colorfulness": 16.5,
+  "class_entropy": 0.922,
+  "classes": {
+   "car": 8,
+   "truck": 1,
+   "boat": 1
+  },
+  "motion_entropy": -0.0,
+  "motion_bins": {
+   "E": 1
+  }
+ }
+]

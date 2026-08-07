@@ -1,0 +1,233 @@
+[
+ {
+  "id": "5d055599-875a-4010-991f-e7e454889052",
+  "name": "7 Ave @ 40 St",
+  "latitude": 40.754746,
+  "longitude": -73.987894,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/5d055599-875a-4010-991f-e7e454889052/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "45cb119b-0e4a-442e-9410-b810ab8c255d",
+  "name": "7 Ave @ 43 St",
+  "latitude": 40.756691,
+  "longitude": -73.986476,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/45cb119b-0e4a-442e-9410-b810ab8c255d/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "bc2fd2da-1d56-46fa-a1ab-8674fac93877",
+  "name": "7 Ave @ 43 St - 64.186 - PTZ",
+  "latitude": 40.756707,
+  "longitude": -73.986442,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/bc2fd2da-1d56-46fa-a1ab-8674fac93877/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "19789499-03ac-45de-9401-a7a71ea60d1e",
+  "name": "7 AVE @ 44 St",
+  "latitude": 40.75736,
+  "longitude": -73.986,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/19789499-03ac-45de-9401-a7a71ea60d1e/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "bca4a4b0-d73f-4937-9301-85ff8293bd94",
+  "name": "7 AVE @ 42 St",
+  "latitude": 40.75609,
+  "longitude": -73.9869,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/bca4a4b0-d73f-4937-9301-85ff8293bd94/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "fc7db899-7a79-41f3-b9b1-b23ce64c5a5e",
+  "name": "7 Ave @ 49 St",
+  "latitude": 40.7604823513464,
+  "longitude": -73.983738054794,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/fc7db899-7a79-41f3-b9b1-b23ce64c5a5e/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "053e8995-f8cb-4d02-a659-70ac7c7da5db",
+  "name": "Broadway @ 45 St",
+  "latitude": 40.757953,
+  "longitude": -73.98549,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/053e8995-f8cb-4d02-a659-70ac7c7da5db/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "1927b469-e2dc-4943-a70c-e6e52fd4c48c",
+  "name": "Broadway @ 46 St- Quad South",
+  "latitude": 40.758692,
+  "longitude": -73.985371,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/1927b469-e2dc-4943-a70c-e6e52fd4c48c/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "9565e94d-66f2-4965-9c13-82d5500d6cfd",
+  "name": "Broadway @ 42 St",
+  "latitude": 40.7558094297322,
+  "longitude": -73.9864124090652,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/9565e94d-66f2-4965-9c13-82d5500d6cfd/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "8cd15417-5b79-4065-9165-4b6ff0ff3f53",
+  "name": "Broadway @ 46 St- Quad West",
+  "latitude": 40.75872,
+  "longitude": -73.98539,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/8cd15417-5b79-4065-9165-4b6ff0ff3f53/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "0c9a2836-c408-48d3-85c7-1977c33d9133",
+  "name": "Broadway @ 46 St",
+  "latitude": 40.758741,
+  "longitude": -73.985437,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/0c9a2836-c408-48d3-85c7-1977c33d9133/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "d8122408-7092-41ba-a9db-ef8847edeaef",
+  "name": "Broadway @ 43 St",
+  "latitude": 40.756583,
+  "longitude": -73.986156,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/d8122408-7092-41ba-a9db-ef8847edeaef/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "76faba94-f9e5-42d7-981e-0cbbbfd4bc21",
+  "name": "Broadway @ 46 Street",
+  "latitude": 40.758711,
+  "longitude": -73.985366,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/76faba94-f9e5-42d7-981e-0cbbbfd4bc21/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "dbbf45f6-7d87-46fa-825f-454a7e2bbcad",
+  "name": "Broadway @ 46 St- Quad East",
+  "latitude": 40.7587,
+  "longitude": -73.985348,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/dbbf45f6-7d87-46fa-825f-454a7e2bbcad/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "f3d82b25-6b10-44c7-ae89-30df075a7ac8",
+  "name": "Broadway @ 46 St- Quad North",
+  "latitude": 40.758722,
+  "longitude": -73.98536,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/f3d82b25-6b10-44c7-ae89-30df075a7ac8/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "f06979b2-3497-4330-9882-a06c8a442b7c",
+  "name": "6 Ave @ 34 St",
+  "latitude": 40.749808,
+  "longitude": -73.987746,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/f06979b2-3497-4330-9882-a06c8a442b7c/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "3486cafa-aab2-418a-baa4-89dcc438e8c9",
+  "name": "5 Ave @ 23 St",
+  "latitude": 40.7415700588724,
+  "longitude": -73.9895780597063,
+  "area": "Manhattan",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/3486cafa-aab2-418a-baa4-89dcc438e8c9/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "84a2c36a-ef84-41b6-a4eb-3c3a2bf3bf10",
+  "name": "Stillwell Ave @ Surf Ave",
+  "latitude": 40.575565,
+  "longitude": -73.981202,
+  "area": "Brooklyn",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/84a2c36a-ef84-41b6-a4eb-3c3a2bf3bf10/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "9010e3c3-c888-43d4-9c26-59e9b802dbcb",
+  "name": "Old Fulton St @ Furman St",
+  "latitude": 40.702956,
+  "longitude": -73.994687,
+  "area": "Brooklyn",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/9010e3c3-c888-43d4-9c26-59e9b802dbcb/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "7a0d9e49-875c-4c25-a92b-3d239de40d43",
+  "name": "Old Fulton St @ Prospect St",
+  "latitude": 40.700757,
+  "longitude": -73.991042,
+  "area": "Brooklyn",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/7a0d9e49-875c-4c25-a92b-3d239de40d43/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ },
+ {
+  "id": "f134b133-75ef-40a8-8fbb-f9c51355e6b5",
+  "name": "Old Fulton St @ Vine St/Hicks St - quad - 156.24",
+  "latitude": 40.701936,
+  "longitude": -73.992574,
+  "area": "Brooklyn",
+  "isOnline": "true",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/f134b133-75ef-40a8-8fbb-f9c51355e6b5/image",
+  "source": "nyc-dot",
+  "why": "heavy foot traffic"
+ }
+]
