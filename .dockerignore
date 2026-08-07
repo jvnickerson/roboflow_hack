@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.git/
+.env
+.claude/
+HANDOFF.md
+Screenshot*.png
+data/frames/
+data/sweep/latest/
+data/detections/
