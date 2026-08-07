@@ -45,12 +45,17 @@ Or by hand:
 
 ```bash
 gcloud run deploy vision --source . --region us-east1 \
-  --allow-unauthenticated --min-instances=1 --no-cpu-throttling
+  --allow-unauthenticated --min-instances=1 --no-cpu-throttling \
+  --clear-base-image
 ```
 
-- **Both flags are required.** Cloud Run throttles CPU to ~0 between requests
-  and scales to zero when idle; either one stalls or kills `server.py`'s
-  background sweep thread.
+- **Both scaling flags are required.** Cloud Run throttles CPU to ~0 between
+  requests and scales to zero when idle; either one stalls or kills
+  `server.py`'s background sweep thread.
+- **`--clear-base-image` is required** if the service was ever deployed from
+  buildpacks before switching to the Dockerfile. Otherwise gcloud stops with
+  "Base image is not supported for services built from Dockerfile". Hit on
+  the first Dockerfile deploy of `vision`.
 - `Dockerfile` builds the image; `.dockerignore` controls its contents.
   `.gcloudignore` separately controls what gets **uploaded** to Cloud Build.
   Without it gcloud falls back to `.gitignore`, which does not exclude

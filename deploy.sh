@@ -3,6 +3,10 @@
 #
 # Flags match the requirement in server.py: the background sweep thread needs
 # CPU between requests and an instance that does not scale to zero.
+#
+# --clear-base-image is required once a service has been deployed from
+# buildpacks and then switches to a Dockerfile. Without it gcloud fails with
+# "Base image is not supported for services built from Dockerfile".
 
 set -euo pipefail
 
@@ -17,6 +21,7 @@ gcloud run deploy "$SERVICE" \
   --allow-unauthenticated \
   --min-instances=1 \
   --no-cpu-throttling \
+  --clear-base-image \
   --quiet
 
 URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
