@@ -24,10 +24,12 @@ import requests
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TICK = 6            # loop interval; DOT stills refresh ~every 2 s, faster sampling wastes calls
-POOL_PER_TICK = 3   # pool cams sampled per tick, round-robin
-CONF = 0.15         # confidence floor for counting a person. Night at 352x240 puts real
-                    # Times Square crowds at 0.16-0.39 (measured 2026-08-07 7 PM, rain);
-                    # 0.5 would caption crowds as empty. Daytime can afford 0.5.
+POOL_PER_TICK = 5   # pool cams sampled per tick, round-robin (31-cam list rescans ~40s)
+PERSON_CONF = 0.05  # near-zero on purpose: night at 352x240 puts visible crowds at
+                    # 0.05-0.39 confidence (measured 2026-08-07 7 PM, rain). Over-cutting
+                    # is safe for this channel; showing a crowd captioned "empty" is not.
+VEHICLE_CONF = 0.25 # vehicles detect stronger at night; "empty" means no people AND no traffic
+                    # (Ida's call, 8-07 ~7:40 PM, after seeing the first deploy on air)
 API_CONF = 0.05     # ask the API for everything; the hosted default (0.4) hides night people
 QUALIFY_STREAK = 2  # consecutive person-free samples to qualify; one occupied sample re-arms
 MIN_DWELL = 12      # min seconds on air before a rotation (never blocks a disqualification cut)
@@ -37,20 +39,22 @@ FAIL_LIMIT = 3      # consecutive fetch/API failures before a cam is benched
 FAIL_BENCH = 600    # bench duration in seconds
 
 MODEL = os.environ.get("ROBOFLOW_MODEL", "coco/3")  # hosted COCO; the "yolov8n-640" alias 404s over raw HTTP
-PERSON_CLASSES = {"person"}  # add "car", "truck", "bus" here to count vehicles too
+PERSON_CLASSES = {"person"}
+VEHICLE_CLASSES = {"car", "truck", "bus", "motorcycle", "bicycle", "train"}
 
 CHANNELS = {
     "empty": {
-        "sources": "data/pedestrian_cams.json",
+        "sources": "data/empty_cams.json",
         "state": "data/channel/empty.json",
     },
 }
 
 
-def count_persons(image_url: str, api_key: str) -> int | None:
+def count_occupants(image_url: str, api_key: str) -> int | None:
     """One Roboflow serverless call; the API fetches the image URL itself.
 
-    Returns the person count, or None on any failure (treated as no sample).
+    Returns how many people or vehicles occupy the scene, or None on any
+    failure (treated as no sample). "Empty" means zero of either.
     """
     url = (
         f"https://serverless.roboflow.com/{MODEL}"
@@ -59,10 +63,14 @@ def count_persons(image_url: str, api_key: str) -> int | None:
     resp = requests.post(url, timeout=10)
     data = resp.json()  # non-JSON raises -> caller counts a failure
     preds = data["predictions"]  # missing key raises -> failure
-    return sum(
-        1 for p in preds
-        if p.get("class") in PERSON_CLASSES and p.get("confidence", 0) >= CONF
-    )
+    n = 0
+    for p in preds:
+        cls, conf = p.get("class"), p.get("confidence", 0)
+        if cls in PERSON_CLASSES and conf >= PERSON_CONF:
+            n += 1
+        elif cls in VEHICLE_CLASSES and conf >= VEHICLE_CONF:
+            n += 1
+    return n
 
 
 class CamState:
@@ -120,7 +128,7 @@ def switcher_loop(channel: str = "empty") -> None:
             return
         api_calls += 1
         try:
-            n = count_persons(cs.cam["imageUrl"], api_key)
+            n = count_occupants(cs.cam["imageUrl"], api_key)
         except Exception as exc:
             n = None
             last_error = f"{type(exc).__name__}: {exc}"[:200]
