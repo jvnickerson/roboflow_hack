@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Empty New York</title>
+<style>
+  :root { --ink: #f2f6fa; --dim: #8c9fb2; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden;
+    font: 14px/1.45 "SF Mono", Menlo, monospace; color: var(--ink); }
+
+  /* two stacked frames so a cut can cross-dissolve later without a server
+     change; tonight the swap is instant (see SPEC "What to cut if late") */
+  .frame { position: fixed; inset: 0; opacity: 0; transition: opacity .18s linear; }
+  .frame.on { opacity: 1; }
+  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* lower third */
+  #lower { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4;
+    padding: 92px 54px 40px;
+    background: linear-gradient(transparent, rgba(0,0,0,.62) 42%, rgba(0,0,0,.88));
+    pointer-events: none; }
+  #chan { font-size: 12px; letter-spacing: 5px; color: var(--dim); }
+  #cam  { font-size: 34px; font-weight: 500; letter-spacing: .6px; margin-top: 9px;
+          text-shadow: 0 2px 22px #000; }
+  #meta { margin-top: 8px; color: var(--dim); letter-spacing: .5px; }
+  #meta b { color: var(--ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+  #dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+         background: #7ee787; margin-right: 9px; vertical-align: middle;
+         box-shadow: 0 0 10px #7ee787; }
+  #dot.scan { background: #ffb454; box-shadow: 0 0 10px #ffb454;
+              animation: pulse 1.6s ease-in-out infinite; }
+  #dot.stale { background: #ff6b6b; box-shadow: 0 0 10px #ff6b6b; }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+  #topright { position: fixed; top: 34px; right: 44px; z-index: 4;
+              text-align: right; color: var(--dim); font-size: 12px;
+              letter-spacing: 1px; text-shadow: 0 2px 14px #000; }
+</style>
+</head>
+<body>
+<div class="frame" id="fa"><img alt=""></div>
+<div class="frame" id="fb"><img alt=""></div>
+
+<div id="topright"></div>
+
+<div id="lower">
+  <div id="chan">EMPTY NEW YORK</div>
+  <div id="cam">connecting…</div>
+  <div id="meta"><span id="dot" class="scan"></span><span id="status">waiting for the switcher</span></div>
+</div>
+
+<script>
+/* Reads only the state file (SPEC "The state file contract") — never joins
+   against cameras.json, never computes a slug. Channel-generic: the title and
+   the state path both come from the channel name, so a second channel is a
+   URL change, not a code change.
+     /channel                     -> data/channel/empty.json
+     /channel?channel=water       -> data/channel/water.json
+     /channel?src=/data/channel/empty.sample.json   (fixture, for offline dev) */
+const Q = new URLSearchParams(location.search);
+const CHANNEL = Q.get('channel') || 'empty';
+const SRC = Q.get('src') || `data/channel/${CHANNEL}.json`;
+const POLL_MS = 2000;     // state poll AND frame refresh (SPEC)
+const STALE_S = 30;       // state older than this = switcher has frozen
+
+const TITLES = {
+  empty: ['EMPTY NEW YORK', 'scanning for empty streets'],
+  water: ['WATER ON THE LENS', 'scanning for rain on the glass'],
+  neon:  ['NEON NEW YORK',  'scanning for colour'],
+};
+const [TITLE, SCANNING] = TITLES[CHANNEL] || [CHANNEL.toUpperCase(), 'scanning'];
+
+const $ = id => document.getElementById(id);
+let frames = [$('fa'), $('fb')], front = 0;
+let slug = null, since = null, serverNow = null, localAt = 0, mode = 'degraded';
+let lastGood = false;
+
+$('chan').textContent = TITLE;
+
+function show(url) {
+  // load into the back frame; only swap once it has actually decoded, so a
+  // failed fetch leaves the current frame up instead of blanking (SPEC)
+  const back = frames[1 - front];
+  const img = new Image();
+  img.onload = () => {
+    back.querySelector('img').src = img.src;
+    back.classList.add('on');
+    frames[front].classList.remove('on');
+    front = 1 - front;
+    lastGood = true;
+  };
+  img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+}
+
+function elapsed() {
+  if (since == null || serverNow == null) return null;
+  const drift = (Date.now() - localAt) / 1000;
+  return Math.max(0, Math.round(serverNow - since + drift));
+}
+
+function clock(s) {
+  if (s == null) return '';
+  const m = Math.floor(s / 60), r = s % 60;
+  return m ? `${m}m ${String(r).padStart(2, '0')}s` : `${r}s`;
+}
+
+function paint() {
+  const stale = serverNow != null && (Date.now() - localAt) / 1000 > STALE_S;
+  const dot = $('dot');
+  dot.className = stale ? 'stale' : (mode === 'live' ? '' : 'scan');
+  if (stale) {
+    $('status').textContent = 'switcher not responding — holding last frame';
+  } else if (mode === 'live') {
+    $('status').innerHTML = `empty for <b>${clock(elapsed())}</b>`;
+  } else {
+    $('status').textContent = SCANNING;
+  }
+}
+
+async function tick() {
+  try {
+    const r = await fetch(SRC + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const s = await r.json();
+    const air = s.on_air;
+    if (air) {
+      mode = s.mode || 'degraded';
+      serverNow = s.ts; localAt = Date.now();
+      if (air.slug !== slug) {           // the cut
+        slug = air.slug;
+        since = air.since;
+        $('cam').textContent = air.name;
+        $('topright').innerHTML =
+          `${(air.area || '').toUpperCase()}<br>${s.stats ? s.stats.qualified_now + ' of ' + s.stats.list_size + ' qualified' : ''}`;
+      }
+      show(air.imageUrl);                // refresh the frame every poll
+    }
+  } catch (e) {
+    // hold the last good frame; the dot goes stale on its own via paint()
+    if (!lastGood) $('cam').textContent = 'waiting for the switcher';
+  }
+  paint();
+}
+
+tick();
+setInterval(tick, POLL_MS);
+setInterval(paint, 1000);   // the empty-for counter ticks between polls
+</script>
+</body>
+</html>

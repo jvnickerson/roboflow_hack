@@ -1,0 +1,44 @@
+{
+ "channel": "empty",
+ "mode": "live",
+ "ts": 1754607600,
+ "tick": 412,
+ "on_air": {
+  "slug": "7-ave--40-st",
+  "name": "7 Ave @ 40 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/5d055599-875a-4010-991f-e7e454889052/image",
+  "since": 1754607570,
+  "persons": 0,
+  "reason": "qualified"
+ },
+ "previous": {
+  "slug": "7-ave--43-st",
+  "name": "7 Ave @ 43 St"
+ },
+ "queue": [
+  {
+   "slug": "broadway--46-st--quad-north",
+   "name": "Broadway @ 46 St- Quad North",
+   "area": "Manhattan",
+   "imageUrl": "https://webcams.nyctmc.org/api/cameras/f3d82b25-6b10-44c7-ae89-30df075a7ac8/image",
+   "persons": 0,
+   "streak": 2
+  },
+  {
+   "slug": "7-ave--42-st",
+   "name": "7 AVE @ 42 St",
+   "area": "Manhattan",
+   "imageUrl": "https://webcams.nyctmc.org/api/cameras/bca4a4b0-d73f-4937-9301-85ff8293bd94/image",
+   "persons": 1,
+   "streak": 0
+  }
+ ],
+ "stats": {
+  "list_size": 21,
+  "qualified_now": 4,
+  "api_calls": 913,
+  "api_ok": true,
+  "last_error": null
+ }
+}
