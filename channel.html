@@ -15,6 +15,21 @@
   .frame.on { opacity: 1; }
   .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+  /* montage view: on_air plus the top of the queue, overlapping, edges
+     dissolved to black. SPEC keeps this grammar open via the queue field —
+     it is composed purely in HTML, no server change. */
+  .lens { position: absolute; mix-blend-mode: screen; opacity: 0;
+          transition: opacity 1.6s ease; will-change: opacity; }
+  .lens img { display: block; width: 100%; height: 100%; object-fit: cover;
+    -webkit-mask-image: radial-gradient(ellipse 62% 62% at 50% 50%,
+              #000 0%, rgba(0,0,0,.92) 38%, rgba(0,0,0,.35) 66%, transparent 82%);
+            mask-image: radial-gradient(ellipse 62% 62% at 50% 50%,
+              #000 0%, rgba(0,0,0,.92) 38%, rgba(0,0,0,.35) 66%, transparent 82%); }
+  #vign { position: fixed; inset: 0; pointer-events: none; z-index: 3; display: none;
+          background: radial-gradient(ellipse 78% 78% at 50% 50%,
+                      transparent 42%, rgba(0,0,0,.72) 88%, #000 100%); }
+  body.montage #vign { display: block; }
+
   /* lower third */
   #lower { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4;
     padding: 92px 54px 40px;
@@ -42,6 +57,8 @@
 <body>
 <div class="frame" id="fa"><img alt=""></div>
 <div class="frame" id="fb"><img alt=""></div>
+<div id="stage"></div>
+<div id="vign"></div>
 
 <div id="topright"></div>
 
@@ -64,6 +81,11 @@ const CHANNEL = Q.get('channel') || 'empty';
 const SRC = Q.get('src') || `data/channel/${CHANNEL}.json`;
 const POLL_MS = 2000;     // state poll AND frame refresh (SPEC)
 const STALE_S = 30;       // state older than this = switcher has frozen
+// ?view=montage overlaps on_air with the top of the queue. Works on any
+// channel because every state file carries both. Default stays single —
+// one feed at a time is the channel premise (SPEC "The composed frame").
+const MONTAGE = Q.get('view') === 'montage';
+const LENSES = Math.max(2, Math.min(4, +Q.get('lenses') || 3));
 
 const TITLES = {
   empty: ['EMPTY NEW YORK', 'scanning for empty streets'],
@@ -92,6 +114,71 @@ function show(url) {
     lastGood = true;
   };
   img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+}
+
+/* ---- montage: on_air + the top of the queue, overlapping ---- */
+const SPOTS = [
+  { w: .62, h: .66, x: .05, y: .14 },
+  { w: .56, h: .60, x: .40, y: .05 },
+  { w: .60, h: .64, x: .29, y: .35 },
+  { w: .48, h: .52, x: .62, y: .40 },
+];
+let lensEls = [], lensCams = [];
+
+function ensureLenses() {
+  if (lensEls.length) return;
+  document.body.classList.add('montage');
+  for (let i = 0; i < LENSES; i++) {
+    const el = document.createElement('div');
+    el.className = 'lens';
+    el.innerHTML = '<img alt="">';
+    const s = SPOTS[i % SPOTS.length];
+    Object.assign(el.style, {
+      width: (s.w * 100) + 'vw', height: (s.h * 100) + 'vh',
+      left: (s.x * 100) + 'vw', top: (s.y * 100) + 'vh',
+    });
+    $('stage').appendChild(el);
+    lensEls.push(el);
+  }
+}
+
+function montageCams(state) {
+  // on air first, then the queue, deduped by slug
+  const out = [], seen = new Set();
+  for (const c of [state.on_air, ...(state.queue || [])]) {
+    if (c && c.imageUrl && !seen.has(c.slug)) { seen.add(c.slug); out.push(c); }
+    if (out.length === LENSES) break;
+  }
+  return out;
+}
+
+function pullLens(i) {
+  const cam = lensCams[i];
+  if (!cam) return;
+  const img = new Image();
+  img.onload = () => {
+    lensEls[i].querySelector('img').src = img.src;
+    lensEls[i].style.opacity = 1;
+    lastGood = true;
+  };
+  img.src = cam.imageUrl + '?t=' + Date.now();
+}
+
+function renderMontage(state) {
+  ensureLenses();
+  const cams = montageCams(state);
+  cams.forEach((cam, i) => {
+    if (!lensCams[i] || lensCams[i].slug !== cam.slug) {
+      lensCams[i] = cam;                       // the cut, per lens
+    }
+  });
+  lensCams.length = cams.length;
+  lensEls.forEach((el, i) => { if (!lensCams[i]) el.style.opacity = 0; });
+  lensCams.forEach((_, i) => pullLens(i));
+
+  $('cam').textContent = cams[0] ? cams[0].name : '—';
+  $('topright').innerHTML = cams.slice(0, LENSES).map(c =>
+    `${c.name} · ${c.area || ''}${c.metric_label ? ' · ' + c.metric_label : ''}`).join('<br>');
 }
 
 function elapsed() {
@@ -135,11 +222,14 @@ async function tick() {
       if (air.slug !== slug) {           // the cut
         slug = air.slug;
         since = air.since;
-        $('cam').textContent = air.name;
-        $('topright').innerHTML =
-          `${(air.area || '').toUpperCase()}<br>${s.stats ? s.stats.qualified_now + ' of ' + s.stats.list_size + ' qualified' : ''}`;
+        if (!MONTAGE) {
+          $('cam').textContent = air.name;
+          $('topright').innerHTML =
+            `${(air.area || '').toUpperCase()}<br>${s.stats ? s.stats.qualified_now + ' of ' + s.stats.list_size + ' qualified' : ''}`;
+        }
       }
-      show(air.imageUrl);                // refresh the frame every poll
+      if (MONTAGE) renderMontage(s);     // several lenses, dissolved together
+      else show(air.imageUrl);           // one feed, full bleed
     }
   } catch (e) {
     // hold the last good frame; the dot goes stale on its own via paint()
