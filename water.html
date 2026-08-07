@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Water on the Lens</title>
+<style>
+  :root { --ink: #d6e2ee; --dim: #64798f; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden;
+    font: 13px/1.5 "SF Mono", Menlo, monospace; color: var(--ink); }
+
+  #stage { position: fixed; inset: 0; }
+
+  .lens {
+    position: absolute;
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 2.2s ease;
+    will-change: opacity;
+  }
+  .lens img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    /* edges dissolve to black */
+    -webkit-mask-image: radial-gradient(ellipse 62% 62% at 50% 50%,
+              #000 0%, rgba(0,0,0,.92) 38%, rgba(0,0,0,.35) 66%, transparent 82%);
+            mask-image: radial-gradient(ellipse 62% 62% at 50% 50%,
+              #000 0%, rgba(0,0,0,.92) 38%, rgba(0,0,0,.35) 66%, transparent 82%);
+  }
+
+  header { position: fixed; top: 34px; left: 40px; z-index: 5; pointer-events: none;
+           text-shadow: 0 2px 18px #000; }
+  h1 { font-size: 27px; font-weight: 500; letter-spacing: 3.5px; }
+  #obs { color: var(--dim); margin-top: 7px; letter-spacing: .6px; }
+
+  #names { position: fixed; left: 40px; bottom: 34px; z-index: 5; pointer-events: none;
+           text-shadow: 0 2px 14px #000; }
+  #names div { color: var(--dim); transition: color .6s; }
+  #names b { color: var(--ink); font-weight: 400; }
+
+  #map { position: fixed; right: 36px; bottom: 32px; z-index: 5;
+         width: 232px; height: 268px; opacity: .92; }
+  #map .grid { fill: #22303f; }
+  #map .pick { fill: #eaf2fa; }
+  #map .halo { fill: none; stroke: #9fd0ff; stroke-width: 1.1; opacity: .75; }
+  #maplabel { position: fixed; right: 36px; bottom: 12px; z-index: 5;
+              color: #3d4d5e; font-size: 11px; letter-spacing: .5px; }
+
+  /* vignette keeps the frame edges black no matter what the feeds do */
+  #vign { position: fixed; inset: 0; pointer-events: none; z-index: 3;
+          background: radial-gradient(ellipse 78% 78% at 50% 50%,
+                      transparent 42%, rgba(0,0,0,.72) 88%, #000 100%); }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="vign"></div>
+
+<header>
+  <h1>WATER ON THE LENS</h1>
+  <div id="obs">reading…</div>
+</header>
+
+<div id="names"></div>
+<svg id="map" viewBox="0 0 232 268"></svg>
+<div id="maplabel">966 city cameras · 3 watching</div>
+
+<script>
+const SHOWN = 3;          // lenses on screen at once
+const FRAME_MS = 2200;    // how often each lens pulls a new frame
+const SWAP_MS = 9000;     // how often the configuration changes
+const POOL = 14;          // draw from the N wettest
+
+let cams = [], wet = [], obs = null, active = [], slots = [];
+
+const $ = s => document.querySelector(s);
+
+async function load() {
+  cams = await (await fetch('data/cameras.json')).json();
+  const w = await (await fetch('data/wet_scores.json')).json();
+  obs = w.observed;
+  wet = w.cameras.filter(c => c.lat && c.lng);
+  const t = obs.temp_f != null ? `${obs.temp_f}°F` : '';
+  const h = obs.humidity != null ? ` · humidity ${obs.humidity}%` : '';
+  $('#obs').textContent =
+    `${obs.text}  ${t}${h} — NWS Central Park ${obs.time} UTC · the station is one instrument, these are ${wet.length}`;
+}
+
+/* ---- inset map: every camera in the city is a dot; the shape is the city ---- */
+function drawMap() {
+  const pts = cams.filter(c => c.latitude && c.longitude);
+  const lats = pts.map(p => p.latitude), lngs = pts.map(p => p.longitude);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  const pad = 12, W = 232, H = 268;
+  const k = Math.cos(40.7 * Math.PI / 180);               // lng degrees are shorter
+  const spanX = (maxLng - minLng) * k, spanY = maxLat - minLat;
+  const s = Math.min((W - 2*pad) / spanX, (H - 2*pad) / spanY);
+  window.project = p => [
+    pad + ((p.lng ?? p.longitude) - minLng) * k * s + (W - 2*pad - spanX*s)/2,
+    pad + (maxLat - (p.lat ?? p.latitude)) * s + (H - 2*pad - spanY*s)/2,
+  ];
+  const svg = $('#map');
+  svg.innerHTML = pts.map(p => {
+    const [x, y] = project(p);
+    return `<circle class="grid" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="0.85"/>`;
+  }).join('');
+  svg.insertAdjacentHTML('beforeend', '<g id="picks"></g>');
+}
+
+function markMap() {
+  $('#picks').innerHTML = active.map(c => {
+    const [x, y] = project(c);
+    return `<circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6.5"/>
+            <circle class="pick" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6"/>`;
+  }).join('');
+  $('#names').innerHTML = active.map(c =>
+    `<div><b>${c.name}</b> · ${c.area} · wetness ${c.wetness.toFixed(3)}</div>`).join('');
+}
+
+/* ---- the configuration: overlapping lenses, never a grid ---- */
+function layout(i) {
+  // deliberately overlapping, off-centre, varied scale
+  const spots = [
+    { w: 0.62, h: 0.66, x: 0.06, y: 0.15 },
+    { w: 0.56, h: 0.60, x: 0.40, y: 0.06 },
+    { w: 0.60, h: 0.64, x: 0.30, y: 0.36 },
+    { w: 0.48, h: 0.52, x: 0.62, y: 0.40 },
+  ];
+  const s = spots[i % spots.length];
+  const jx = (Math.random() - 0.5) * 0.05, jy = (Math.random() - 0.5) * 0.05;
+  return { w: s.w * innerWidth, h: s.h * innerHeight,
+           x: (s.x + jx) * innerWidth, y: (s.y + jy) * innerHeight };
+}
+
+function makeSlot(i) {
+  const el = document.createElement('div');
+  el.className = 'lens';
+  el.innerHTML = '<img alt="">';
+  $('#stage').appendChild(el);
+  const s = { el, img: el.querySelector('img'), cam: null };
+  place(s, i);
+  return s;
+}
+
+function place(slot, i) {
+  const L = layout(i);
+  Object.assign(slot.el.style, {
+    width: L.w + 'px', height: L.h + 'px',
+    left: L.x + 'px', top: L.y + 'px',
+  });
+}
+
+function pull(slot) {
+  if (!slot.cam) return;
+  const next = new Image();
+  next.onload = () => { slot.img.src = next.src; slot.el.style.opacity = 1; };
+  next.src = slot.cam.imageUrl + '?t=' + Date.now();
+}
+
+function swap() {
+  const pool = wet.slice(0, POOL);
+  const idx = Math.floor(Math.random() * slots.length);
+  const taken = new Set(active.map(c => c.id));
+  const choices = pool.filter(c => !taken.has(c.id));
+  if (!choices.length) return;
+  const pick = choices[Math.floor(Math.random() * choices.length)];
+
+  const slot = slots[idx];
+  slot.el.style.opacity = 0;                       // dissolve out
+  setTimeout(() => {
+    slot.cam = pick;
+    active[idx] = pick;
+    place(slot, idx);
+    pull(slot);
+    markMap();
+  }, 2200);
+}
+
+async function start() {
+  await load();
+  drawMap();
+  const pool = wet.slice(0, POOL);
+  slots = Array.from({ length: SHOWN }, (_, i) => makeSlot(i));
+  active = pool.slice(0, SHOWN);
+  slots.forEach((s, i) => { s.cam = active[i]; pull(s); });
+  markMap();
+
+  setInterval(() => slots.forEach(pull), FRAME_MS);
+  setInterval(swap, SWAP_MS);
+  addEventListener('resize', () => slots.forEach((s, i) => place(s, i)));
+}
+
+start();
+</script>
+</body>
+</html>
