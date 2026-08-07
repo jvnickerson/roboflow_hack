@@ -3,3 +3,10 @@ __pycache__/
 .DS_Store
 lens.html
 .env
+
+# --- private during hackathon: repo must go public for judging (handbook
+# "Open Source" criterion), but the inquiry ledger is Jeff's personal
+# research-practice tooling, not hackathon deliverable. Un-gitignore
+# these two lines after the event if you want them back in the public repo.
+inquiry/
+ledgers/
