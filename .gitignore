@@ -12,3 +12,4 @@ inquiry/
 ledgers/
 data/sweep/latest/
 data/channel/empty.json
+data/channel/noir.json
