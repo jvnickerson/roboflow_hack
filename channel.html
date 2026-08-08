@@ -97,6 +97,7 @@
     <div class="lbl">CHANNEL</div>
     <div class="row" id="chanRow">
       <button data-ch="empty">EMPTY</button>
+      <button data-ch="noir">NOIR</button>
       <button data-ch="water">WATER</button>
     </div>
   </div>
@@ -108,7 +109,7 @@
     </div>
   </div>
 </div>
-<div id="hint">1 / 2 channel &nbsp; S / M view &nbsp; H hide</div>
+<div id="hint">1 / 2 / 3 channel &nbsp; S / M view &nbsp; H hide</div>
 
 <script>
 /* Reads only the state file (SPEC "The state file contract") — never joins
@@ -132,6 +133,7 @@ let MONTAGE = Q.get('view') === 'montage';
 
 const TITLES = {
   empty: ['EMPTY NEW YORK', 'scanning for empty streets'],
+  noir: ['NOIR NEW YORK', 'scanning for shadow and light'],
   water: ['WATER ON THE LENS', 'scanning for rain on the glass'],
   neon:  ['NEON NEW YORK',  'scanning for colour'],
 };
@@ -340,7 +342,8 @@ $('viewRow').addEventListener('click', e => {
 addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (k === '1') setChannel('empty');
-  else if (k === '2') setChannel('water');
+  else if (k === '2') setChannel('noir');
+  else if (k === '3') setChannel('water');
   else if (k === 's') setView(false);
   else if (k === 'm') setView(true);
   else if (k === 'h') $('ctl').classList.toggle('hidden');
