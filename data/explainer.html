@@ -53,18 +53,18 @@
 <main>
 
 <h1>What's happening right now</h1>
-<div class="snapshot">NYC Vision Hack · updated 8:06&nbsp;PM, Friday Aug 7 · submission locks 8:30&nbsp;PM</div>
+<div class="snapshot">NYC Vision Hack · updated 8:12&nbsp;PM, Friday Aug 7 · submission locks 8:30&nbsp;PM</div>
 
 <div class="status-strip">
   <span class="pill done">✓ repo public</span>
   <span class="pill done">✓ spec shared (SPEC.md)</span>
-  <span class="pill done">✓ LIVE: Empty New York + Noir New York, montage view, on-screen controls</span>
+  <span class="pill done">✓ LIVE: three channels — Empty, Noir, Water on the Lens — with a montage view</span>
   <span class="pill done">✓ README story pass</span>
   <span class="pill next">→ next: entry form by 8:25 · no more changes after 8:15</span>
 </div>
 
-<h2>1 · What you're building: Empty New York + Noir New York</h2>
-<p class="lead">A TV channel that only shows New York street scenes when nothing is in them. Anything entering the frame, a person or (since a 7:30 change) a vehicle, makes it cut away to another empty scene. And since 8&nbsp;PM a second channel rides the same switcher: Noir New York, which qualifies scenes on contrast. The page's 1/2/3 keys and on-screen buttons switch between channels and views.</p>
+<h2>1 · What you're building: three channels on one switcher</h2>
+<p class="lead">Empty New York only shows street scenes with nothing in them — a person or (since 7:30) a vehicle entering the frame cuts it away to another empty scene. Noir New York, added at 8&nbsp;PM, qualifies scenes on contrast instead. Water on the Lens, born as the demo fallback, finds rain on camera glass. The page's buttons and 1/2/3 keys switch channels, and the montage view overlaps lenses on any of them.</p>
 
 <figure>
 <svg viewBox="0 0 940 400" role="img" aria-label="How Empty New York works">
@@ -221,10 +221,10 @@
     <line x1="600" y1="143" x2="600" y2="157" stroke="#6b7280"/><text x="600" y="175">8:45</text>
     <line x1="920" y1="143" x2="920" y2="157" stroke="#6b7280"/><text x="908" y="175">9:45</text>
   </g>
-  <!-- NOW at 8:06 = 392 -->
-  <line x1="392" y1="60" x2="392" y2="150" stroke="#dc2626" stroke-width="2"/>
-  <circle cx="392" cy="150" r="4" fill="#dc2626"/>
-  <text x="392" y="48" text-anchor="middle" font-size="12.5" font-weight="700" fill="#dc2626">NOW 8:06</text>
+  <!-- NOW at 8:12 = 424 -->
+  <line x1="424" y1="60" x2="424" y2="150" stroke="#dc2626" stroke-width="2"/>
+  <circle cx="424" cy="150" r="4" fill="#dc2626"/>
+  <text x="424" y="48" text-anchor="middle" font-size="12.5" font-weight="700" fill="#dc2626">NOW 8:12</text>
 
   <!-- above-axis: gates -->
   <g font-size="12">
@@ -265,7 +265,7 @@
   <li><strong>Demo at 8:45</strong> — the channel full screen, the control-room grid in a second tab. <span class="who both">both</span></li>
 </ol>
 
-<p class="byline">The build has grown well past the spec: emptiness got stricter (vehicles count as occupancy); the overlapping-lenses montage view and on-screen channel controls are live; a second channel, Noir New York, shipped at 8&nbsp;PM with a contrast qualifier on the same switcher; and rain-on-the-glass detection waits as a fallback mood.</p>
+<p class="byline">The build has grown well past the spec: emptiness got stricter (vehicles count as occupancy); Noir New York shipped at 8&nbsp;PM with a contrast qualifier on the same switcher; Water on the Lens graduated from fallback to third channel; and the montage view and on-screen controls tie all three together on one page.</p>
 <p class="byline">Compiled by Claude Code (Fable), 2026-08-07, from the spec and checks of the repo and live service at 7:11 and 7:48 PM.</p>
 
 </main>
