@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What's Happening Right Now — NYC Vision Hack</title>
+<style>
+  :root {
+    --ida: #2563eb; --ida-fill: #dbeafe;
+    --jeff: #d97706; --jeff-fill: #fef3c7;
+    --shared: #6b7280; --shared-fill: #f3f4f6;
+    --done: #16a34a; --ink: #1f2937; --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink); background: #fafaf9; margin: 0; padding: 2rem 1rem;
+    line-height: 1.5;
+  }
+  main { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 0.2rem; }
+  .snapshot { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.4rem; }
+  h2 { font-size: 1.15rem; margin: 2.2rem 0 0.3rem; }
+  p.lead { margin: 0.2rem 0 0.9rem; max-width: 62ch; }
+  .status-strip {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 0.5rem;
+  }
+  .pill {
+    border-radius: 999px; padding: 0.25rem 0.8rem; font-size: 0.85rem;
+    background: #fff; border: 1px solid #d1d5db;
+  }
+  .pill.done { border-color: var(--done); color: var(--done); }
+  .pill.next { border-color: var(--ida); color: var(--ida); }
+  figure { margin: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; min-width: 640px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .legend .l-ida::before { background: var(--ida-fill); border: 1.5px solid var(--ida); }
+  .legend .l-jeff::before { background: var(--jeff-fill); border: 1.5px solid var(--jeff); }
+  .legend .l-shared::before { background: var(--shared-fill); border: 1.5px solid var(--shared); }
+  .legend .l-ext::before { background: #fff; border: 1.5px dashed var(--muted); }
+  ol.steps { max-width: 62ch; padding-left: 1.3rem; }
+  ol.steps li { margin-bottom: 0.45rem; }
+  ol.steps .who { font-size: 0.8rem; border-radius: 4px; padding: 0.05rem 0.4rem; margin-left: 0.3rem; }
+  .who.ida { background: var(--ida-fill); color: var(--ida); }
+  .who.jeff { background: var(--jeff-fill); color: #92400e; }
+  .who.both { background: var(--shared-fill); color: var(--shared); }
+  .byline { color: var(--muted); font-size: 0.8rem; font-style: italic; margin-top: 2.5rem; }
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>What's happening right now</h1>
+<div class="snapshot">NYC Vision Hack · updated 8:06&nbsp;PM, Friday Aug 7 · submission locks 8:30&nbsp;PM</div>
+
+<div class="status-strip">
+  <span class="pill done">✓ repo public</span>
+  <span class="pill done">✓ spec shared (SPEC.md)</span>
+  <span class="pill done">✓ LIVE: Empty New York + Noir New York, montage view, on-screen controls</span>
+  <span class="pill done">✓ README story pass</span>
+  <span class="pill next">→ next: entry form by 8:25 · no more changes after 8:15</span>
+</div>
+
+<h2>1 · What you're building: Empty New York + Noir New York</h2>
+<p class="lead">A TV channel that only shows New York street scenes when nothing is in them. Anything entering the frame, a person or (since a 7:30 change) a vehicle, makes it cut away to another empty scene. And since 8&nbsp;PM a second channel rides the same switcher: Noir New York, which qualifies scenes on contrast. The page's 1/2/3 keys and on-screen buttons switch between channels and views.</p>
+
+<figure>
+<svg viewBox="0 0 940 400" role="img" aria-label="How Empty New York works">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <!-- NYC streets enclosure -->
+  <rect x="15" y="60" width="200" height="200" rx="10" fill="none" stroke="#9ca3af" stroke-dasharray="6 4"/>
+  <text x="115" y="48" text-anchor="middle" font-size="13" fill="#6b7280">NYC streets</text>
+  <rect x="35" y="80" width="160" height="70" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="6 4"/>
+  <text x="115" y="108" text-anchor="middle" font-size="13.5" font-weight="600">966 traffic cameras</text>
+  <text x="115" y="128" text-anchor="middle" font-size="12" fill="#6b7280">a fresh photo every ~2 s</text>
+  <rect x="35" y="170" width="160" height="70" rx="8" fill="#fff" stroke="#9ca3af"/>
+  <text x="115" y="196" text-anchor="middle" font-size="13.5" font-weight="600">the watchlist</text>
+  <text x="115" y="215" text-anchor="middle" font-size="12" fill="#6b7280">21 corners that are</text>
+  <text x="115" y="231" text-anchor="middle" font-size="12" fill="#6b7280">normally packed</text>
+
+  <!-- Roboflow -->
+  <rect x="340" y="40" width="220" height="66" rx="8" fill="#fff" stroke="#6b7280" stroke-dasharray="6 4"/>
+  <text x="450" y="66" text-anchor="middle" font-size="13.5" font-weight="600">Roboflow</text>
+  <text x="450" y="86" text-anchor="middle" font-size="12" fill="#6b7280">a vision service that counts people</text>
+
+  <!-- Google servers enclosure -->
+  <rect x="310" y="140" width="280" height="220" rx="10" fill="#eff6ff" stroke="#2563eb"/>
+  <text x="450" y="163" text-anchor="middle" font-size="13" fill="#2563eb">Google's servers — Ida's half</text>
+  <rect x="330" y="178" width="240" height="96" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="450" y="200" text-anchor="middle" font-size="13.5" font-weight="600">the switcher</text>
+  <text x="450" y="220" text-anchor="middle" font-size="12">every few seconds, checks corners</text>
+  <text x="450" y="237" text-anchor="middle" font-size="12">and puts the emptiest one on air</text>
+  <text x="450" y="254" text-anchor="middle" font-size="12">(anyone or any car appears → cut away)</text>
+  <rect x="330" y="290" width="240" height="52" rx="8" fill="#fff" stroke="#2563eb"/>
+  <text x="450" y="311" text-anchor="middle" font-size="13" font-weight="600">the on-air note</text>
+  <text x="450" y="329" text-anchor="middle" font-size="12" fill="#6b7280">a tiny file: "show 7 Ave @ 40 St"</text>
+
+  <!-- Browser enclosure -->
+  <rect x="700" y="140" width="225" height="220" rx="10" fill="#fffbeb" stroke="#d97706"/>
+  <text x="812" y="163" text-anchor="middle" font-size="13" fill="#92400e">your browser — Jeff's half</text>
+  <rect x="718" y="178" width="189" height="164" rx="8" fill="#fef3c7" stroke="#d97706"/>
+  <text x="812" y="204" text-anchor="middle" font-size="13.5" font-weight="600">the channel page</text>
+  <text x="812" y="228" text-anchor="middle" font-size="12">reads the note every 2 s,</text>
+  <text x="812" y="245" text-anchor="middle" font-size="12">shows the on-air corner</text>
+  <text x="812" y="262" text-anchor="middle" font-size="12">full screen with a caption,</text>
+  <text x="812" y="279" text-anchor="middle" font-size="12">cuts when the note changes</text>
+
+  <!-- edges -->
+  <path d="M 330 226 C 260 226 240 210 197 208" fill="none" stroke="#6b7280" marker-end="url(#arr)"/>
+  <text x="253" y="200" text-anchor="middle" font-size="11.5" fill="#6b7280">watches</text>
+
+  <path d="M 420 178 C 405 145 400 130 405 108" fill="none" stroke="#6b7280" marker-end="url(#arr)"/>
+  <text x="330" y="132" text-anchor="middle" font-size="11.5" fill="#6b7280">"any people in this photo?"</text>
+  <path d="M 490 108 C 497 130 493 145 480 176" fill="none" stroke="#6b7280" marker-end="url(#arr)"/>
+  <text x="575" y="132" text-anchor="middle" font-size="11.5" fill="#6b7280">"0 people" / "3 people"</text>
+
+  <path d="M 340 73 C 270 73 230 85 198 98" fill="none" stroke="#6b7280" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+  <text x="263" y="62" text-anchor="middle" font-size="11.5" fill="#6b7280">fetches the photo itself</text>
+
+  <path d="M 450 274 L 450 288" fill="none" stroke="#2563eb" marker-end="url(#arr)"/>
+  <text x="472" y="285" font-size="11.5" fill="#2563eb">writes</text>
+
+  <path d="M 716 300 C 650 305 620 312 572 314" fill="none" stroke="#6b7280" marker-end="url(#arr)"/>
+  <text x="645" y="296" text-anchor="middle" font-size="11.5" fill="#6b7280">reads every 2 s</text>
+
+  <path d="M 115 152 C 115 380 560 385 715 330" fill="none" stroke="#9ca3af" marker-end="url(#arr)"/>
+  <text x="420" y="390" text-anchor="middle" font-size="11.5" fill="#6b7280">the live picture goes straight from the camera to the screen</text>
+</svg>
+<div class="legend">
+  <span class="l-ida">Ida's half (the decider)</span>
+  <span class="l-jeff">Jeff's half (the screen)</span>
+  <span class="l-ext">outside services</span>
+</div>
+</figure>
+
+<h2>2 · Who is building what, right now</h2>
+<p class="lead">Two laptops, two AI sessions, one shared copy of the code on GitHub. The two halves never touch the same files, and the one thing they share is an agreement, written in the spec, on the exact shape of the on-air note. That agreement is why neither side ever waits for the other.</p>
+
+<figure>
+<svg viewBox="0 0 940 360" role="img" aria-label="Who is building what">
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <!-- GitHub -->
+  <rect x="360" y="20" width="220" height="72" rx="8" fill="#f3f4f6" stroke="#6b7280"/>
+  <text x="470" y="48" text-anchor="middle" font-size="13.5" font-weight="600">GitHub — the shared copy of the code</text>
+  <text x="470" y="68" text-anchor="middle" font-size="12" fill="#6b7280">public since ~7:10 · holds the code</text>
+  <text x="470" y="83" text-anchor="middle" font-size="12" fill="#6b7280">and the spec (SPEC.md)</text>
+
+  <!-- Ida laptop -->
+  <rect x="30" y="120" width="280" height="130" rx="10" fill="#eff6ff" stroke="#2563eb"/>
+  <text x="170" y="145" text-anchor="middle" font-size="13" fill="#2563eb">Ida's laptop</text>
+  <rect x="50" y="158" width="240" height="74" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="170" y="182" text-anchor="middle" font-size="13.5" font-weight="600">Fable session</text>
+  <text x="170" y="202" text-anchor="middle" font-size="12">building the decider: the switcher,</text>
+  <text x="170" y="219" text-anchor="middle" font-size="12">then putting it on Google's servers</text>
+
+  <!-- Jeff laptop -->
+  <rect x="630" y="120" width="280" height="130" rx="10" fill="#fffbeb" stroke="#d97706"/>
+  <text x="770" y="145" text-anchor="middle" font-size="13" fill="#92400e">Jeff's laptop</text>
+  <rect x="650" y="158" width="240" height="74" rx="8" fill="#fef3c7" stroke="#d97706"/>
+  <text x="770" y="182" text-anchor="middle" font-size="13.5" font-weight="600">Opus session</text>
+  <text x="770" y="202" text-anchor="middle" font-size="12">building the screen: the channel</text>
+  <text x="770" y="219" text-anchor="middle" font-size="12">page, tested against a sample note</text>
+
+  <!-- agreement bar -->
+  <rect x="330" y="150" width="280" height="70" rx="8" fill="#fff" stroke="#6b7280"/>
+  <text x="470" y="174" text-anchor="middle" font-size="13" font-weight="600">the agreement</text>
+  <text x="470" y="192" text-anchor="middle" font-size="12" fill="#6b7280">the on-air note's exact shape,</text>
+  <text x="470" y="208" text-anchor="middle" font-size="12" fill="#6b7280">frozen in the spec</text>
+  <path d="M 330 185 L 312 185" fill="none" stroke="#6b7280" marker-end="url(#arr2)"/>
+  <path d="M 610 185 L 628 185" fill="none" stroke="#6b7280" marker-end="url(#arr2)"/>
+
+  <!-- push/pull edges -->
+  <path d="M 240 118 C 290 95 330 80 358 68" fill="none" stroke="#6b7280" marker-end="url(#arr2)"/>
+  <path d="M 700 118 C 650 95 610 80 582 68" fill="none" stroke="#6b7280" marker-end="url(#arr2)"/>
+  <text x="255" y="86" text-anchor="middle" font-size="11.5" fill="#6b7280">pushes finished pieces</text>
+  <text x="688" y="86" text-anchor="middle" font-size="11.5" fill="#6b7280">pushes finished pieces</text>
+
+  <!-- Cloud Run -->
+  <rect x="300" y="280" width="340" height="66" rx="8" fill="#eff6ff" stroke="#2563eb"/>
+  <text x="470" y="304" text-anchor="middle" font-size="13.5" font-weight="600">Google Cloud Run — the live web address</text>
+  <text x="470" y="324" text-anchor="middle" font-size="12" fill="#6b7280">where the two halves meet: her decider serves his page</text>
+  <path d="M 170 252 C 190 275 250 290 298 300" fill="none" stroke="#2563eb" marker-end="url(#arr2)"/>
+  <text x="205" y="288" text-anchor="middle" font-size="11.5" fill="#2563eb">deploys</text>
+  <path d="M 770 252 C 750 275 690 290 642 300" fill="none" stroke="#d97706" stroke-dasharray="5 4" marker-end="url(#arr2)"/>
+  <text x="748" y="288" text-anchor="middle" font-size="11.5" fill="#92400e">arrives via GitHub</text>
+</svg>
+<div class="legend">
+  <span class="l-ida">Ida's side</span>
+  <span class="l-jeff">Jeff's side</span>
+  <span class="l-shared">shared</span>
+</div>
+</figure>
+
+<h2>3 · What will happen: the steps from here</h2>
+<p class="lead">The plan is pinned to clock times, so at any moment there is a working version to ship. Checkmarks are what's already confirmed done.</p>
+
+<figure>
+<svg viewBox="0 0 940 300" role="img" aria-label="Timeline from 7 PM to awards">
+  <!-- axis -->
+  <line x1="40" y1="150" x2="920" y2="150" stroke="#9ca3af" stroke-width="2"/>
+  <!-- ticks: 7:00→9:45 mapped 40→920 ; 165 min total ; ~5.33 px/min -->
+  <!-- 7:15=120  7:45=280  8:05=387  8:15=440  8:30=520  8:45=600  9:45=920 -->
+  <g font-size="12" fill="#6b7280" text-anchor="middle">
+    <line x1="120" y1="143" x2="120" y2="157" stroke="#6b7280"/><text x="120" y="175">7:15</text>
+    <line x1="280" y1="143" x2="280" y2="157" stroke="#6b7280"/><text x="280" y="175">7:45</text>
+    <line x1="387" y1="143" x2="387" y2="157" stroke="#6b7280"/><text x="387" y="175">8:05</text>
+    <line x1="440" y1="143" x2="440" y2="157" stroke="#6b7280"/><text x="440" y="175">8:15</text>
+    <line x1="520" y1="143" x2="520" y2="157" stroke="#6b7280"/><text x="520" y="175">8:30</text>
+    <line x1="600" y1="143" x2="600" y2="157" stroke="#6b7280"/><text x="600" y="175">8:45</text>
+    <line x1="920" y1="143" x2="920" y2="157" stroke="#6b7280"/><text x="908" y="175">9:45</text>
+  </g>
+  <!-- NOW at 8:06 = 392 -->
+  <line x1="392" y1="60" x2="392" y2="150" stroke="#dc2626" stroke-width="2"/>
+  <circle cx="392" cy="150" r="4" fill="#dc2626"/>
+  <text x="392" y="48" text-anchor="middle" font-size="12.5" font-weight="700" fill="#dc2626">NOW 8:06</text>
+
+  <!-- above-axis: gates -->
+  <g font-size="12">
+    <text x="120" y="105" text-anchor="middle" fill="#16a34a">✓ repo public</text>
+    <text x="120" y="122" text-anchor="middle" fill="#16a34a">✓ spec shared</text>
+    <text x="280" y="88" text-anchor="middle" fill="#16a34a">✓ both halves' code pushed;</text>
+    <text x="280" y="105" text-anchor="middle" fill="#1f2937">each tested alone</text>
+    <text x="387" y="55" text-anchor="middle" fill="#16a34a">✓ live + met, early (~7:40)</text>
+    <text x="387" y="72" text-anchor="middle" fill="#1f2937">backup clip still to record</text>
+    <text x="440" y="122" text-anchor="middle" fill="#1f2937">freeze</text>
+    <text x="520" y="88" text-anchor="middle" fill="#1f2937">entry locks</text>
+    <text x="600" y="55" text-anchor="middle" fill="#1f2937">live demo</text>
+    <text x="908" y="122" text-anchor="middle" fill="#1f2937">awards</text>
+  </g>
+
+  <!-- below-axis: what each stretch is -->
+  <g font-size="11.5" fill="#6b7280">
+    <text x="200" y="215" text-anchor="middle">build both halves in parallel</text>
+    <text x="387" y="240" text-anchor="middle">deploy to the live address,</text>
+    <text x="387" y="256" text-anchor="middle">Jeff opens it — done</text>
+    <text x="480" y="215" text-anchor="middle">entry form</text>
+    <text x="480" y="231" text-anchor="middle">+ README</text>
+    <text x="600" y="215" text-anchor="middle">channel on the</text>
+    <text x="600" y="231" text-anchor="middle">big screen</text>
+  </g>
+</svg>
+</figure>
+
+<ol class="steps">
+  <li><strong>Open the repo and share the plan</strong> — repo public, spec on GitHub. <span class="who both">both</span> <em>✓ done</em></li>
+  <li><strong>Build the decider</strong> — the switcher loop that checks corners and writes the on-air note. <span class="who ida">Ida</span> <em>✓ done</em></li>
+  <li><strong>Build the screen</strong> — the channel page, tested against a sample note so it needed nothing from the decider. <span class="who jeff">Jeff</span> <em>✓ done</em></li>
+  <li><strong>Verify the person-counting call works</strong> — done, with fixes found in live testing (model name, night thresholds). <span class="who ida">Ida</span> <em>✓ done</em></li>
+  <li><strong>Go live</strong> — the channel is running at the live address and choosing cameras for real. <span class="who ida">Ida</span> <em>✓ done</em></li>
+  <li><strong>Meet in the middle</strong> — Jeff's page is what the live address serves. <span class="who both">both</span> <em>✓ done</em></li>
+  <li><strong>Record a backup clip</strong> of the live channel, in case a camera picks demo time to go dark. <span class="who jeff">Jeff</span></li>
+  <li><strong>Stop changing things at 8:15</strong>, fill the entry form and README, submit by 8:25. <span class="who both">both</span></li>
+  <li><strong>Demo at 8:45</strong> — the channel full screen, the control-room grid in a second tab. <span class="who both">both</span></li>
+</ol>
+
+<p class="byline">The build has grown well past the spec: emptiness got stricter (vehicles count as occupancy); the overlapping-lenses montage view and on-screen channel controls are live; a second channel, Noir New York, shipped at 8&nbsp;PM with a contrast qualifier on the same switcher; and rain-on-the-glass detection waits as a fallback mood.</p>
+<p class="byline">Compiled by Claude Code (Fable), 2026-08-07, from the spec and checks of the repo and live service at 7:11 and 7:48 PM.</p>
+
+</main>
+</body>
+</html>
