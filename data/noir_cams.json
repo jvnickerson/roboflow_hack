@@ -1,0 +1,272 @@
+[
+ {
+  "id": "6a5f91d8-042f-4678-a722-2c3c560dedf2",
+  "name": "Wythe Ave @ North 12 St",
+  "area": "Brooklyn",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/6a5f91d8-042f-4678-a722-2c3c560dedf2/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.98 dark=0.65 bright=0.13"
+ },
+ {
+  "id": "046d6b99-ffe1-4761-beb4-5c0a2fc6000e",
+  "name": "Woodhaven Blvd @ Furmanville Ave",
+  "area": "Queens",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/046d6b99-ffe1-4761-beb4-5c0a2fc6000e/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.882 dark=0.669 bright=0.067"
+ },
+ {
+  "id": "5caa3ace-277b-42db-97bd-585f29b0d49f",
+  "name": "Central Park West @ W 61 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/5caa3ace-277b-42db-97bd-585f29b0d49f/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.949 dark=0.575 bright=0.076"
+ },
+ {
+  "id": "8f692f55-8118-423b-8bcb-1ea49eaf442b",
+  "name": "2 Ave @ 42 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/8f692f55-8118-423b-8bcb-1ea49eaf442b/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.957 dark=0.489 bright=0.105"
+ },
+ {
+  "id": "0cef143f-b3d8-4066-84ee-6114fa6e76e0",
+  "name": "Lexington Ave @ E 110 Street",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/0cef143f-b3d8-4066-84ee-6114fa6e76e0/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.922 dark=0.514 bright=0.112"
+ },
+ {
+  "id": "418ae598-7cdd-48ff-8aea-97fc3d312407",
+  "name": "Atlantic Ave @ Clinton ST",
+  "area": "Brooklyn",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/418ae598-7cdd-48ff-8aea-97fc3d312407/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.89 dark=0.596 bright=0.075"
+ },
+ {
+  "id": "85837859-3e5d-4e1b-8740-1c2ea3ed5662",
+  "name": "Broome St and Lafayette St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/85837859-3e5d-4e1b-8740-1c2ea3ed5662/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.925 dark=0.593 bright=0.062"
+ },
+ {
+  "id": "3d8e276f-b179-414d-a506-679d5e559d3e",
+  "name": "Broadway @ 51 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/3d8e276f-b179-414d-a506-679d5e559d3e/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.941 dark=0.516 bright=0.08"
+ },
+ {
+  "id": "c34ca47e-e375-4b9f-a8d7-f9737566b783",
+  "name": "6 Ave @ 42 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/c34ca47e-e375-4b9f-a8d7-f9737566b783/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.894 dark=0.6 bright=0.066"
+ },
+ {
+  "id": "3ad126cc-3f99-4626-a229-b9ba4d3f4b63",
+  "name": "St Nicholas Ave @ 181 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/3ad126cc-3f99-4626-a229-b9ba4d3f4b63/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.933 dark=0.49 bright=0.087"
+ },
+ {
+  "id": "19a2c89d-ea4d-437a-ae0c-2902ade217d6",
+  "name": "Central Park West @ 96 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/19a2c89d-ea4d-437a-ae0c-2902ade217d6/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.878 dark=0.598 bright=0.064"
+ },
+ {
+  "id": "5c505897-b475-4359-897d-b064bdb9feef",
+  "name": "8 AVE @ 44 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/5c505897-b475-4359-897d-b064bdb9feef/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.98 dark=0.385 bright=0.124"
+ },
+ {
+  "id": "15f7a00b-5afb-4193-a5e4-dfe7710a5dfe",
+  "name": "3 AVE @ 34 ST",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/15f7a00b-5afb-4193-a5e4-dfe7710a5dfe/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.886 dark=0.499 bright=0.093"
+ },
+ {
+  "id": "52b1ec32-8603-41e1-af1f-b1e1e33752cb",
+  "name": "Drumgoole Rd E @ Arden Ave - quad - Ptz - 1.130",
+  "area": "Staten Island",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/52b1ec32-8603-41e1-af1f-b1e1e33752cb/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.824 dark=0.566 bright=0.089"
+ },
+ {
+  "id": "cd949f21-54b2-4d11-8aae-4ffba8654271",
+  "name": "5 Ave @ E 60 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/cd949f21-54b2-4d11-8aae-4ffba8654271/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.91 dark=0.554 bright=0.064"
+ },
+ {
+  "id": "08c57946-9560-49b9-97a5-43dc5b74fd86",
+  "name": "Cadman Plz E/Washington St @ Prospect St",
+  "area": "Brooklyn",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/08c57946-9560-49b9-97a5-43dc5b74fd86/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.808 dark=0.546 bright=0.142"
+ },
+ {
+  "id": "9f6b60c8-b940-4eec-a3c5-4b60d24c751b",
+  "name": "YORK AVENUE @ EAST 60 STREET",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/9f6b60c8-b940-4eec-a3c5-4b60d24c751b/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.965 dark=0.442 bright=0.081"
+ },
+ {
+  "id": "9a44eb83-317e-4d83-8f0d-e753316c537e",
+  "name": "QBB LL CM @ E Channel",
+  "area": "Queens",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/9a44eb83-317e-4d83-8f0d-e753316c537e/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.894 dark=0.508 bright=0.073"
+ },
+ {
+  "id": "15c0758b-5c9a-4841-8514-c04bc7320c70",
+  "name": "NB Cross Brx Expy-Webster Av Exit ramp @ E 174 St & Cater Av",
+  "area": "Bronx",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/15c0758b-5c9a-4841-8514-c04bc7320c70/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.886 dark=0.5 bright=0.076"
+ },
+ {
+  "id": "374c2047-3868-47e0-9767-a1a701d3fc67",
+  "name": "Bay Parkway @ Benson Ave",
+  "area": "Brooklyn",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/374c2047-3868-47e0-9767-a1a701d3fc67/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.937 dark=0.376 bright=0.102"
+ },
+ {
+  "id": "a6bd09c7-9195-4e0b-ac0f-78114a7d63a1",
+  "name": "Park Ave @ E 125 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/a6bd09c7-9195-4e0b-ac0f-78114a7d63a1/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.8 dark=0.494 bright=0.103"
+ },
+ {
+  "id": "0acd4543-183d-40c7-993e-e39eb831de0b",
+  "name": "QBB LL CM @ York Ave",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/0acd4543-183d-40c7-993e-e39eb831de0b/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.898 dark=0.488 bright=0.069"
+ },
+ {
+  "id": "e38f2549-cdbf-4d78-a0c6-d71e5421ac1e",
+  "name": "Bruckner Expy @ Sheridian Blvd",
+  "area": "Bronx",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/e38f2549-cdbf-4d78-a0c6-d71e5421ac1e/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.89 dark=0.401 bright=0.131"
+ },
+ {
+  "id": "89f83119-67ea-4395-9402-66cc19f5d57b",
+  "name": "Farmers Blvd @ N Conduit Ave",
+  "area": "Queens",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/89f83119-67ea-4395-9402-66cc19f5d57b/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.816 dark=0.609 bright=0.055"
+ },
+ {
+  "id": "4bd443cf-374f-493b-a99e-5f7ef81bb62c",
+  "name": "3 Ave @ E 88 St",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/4bd443cf-374f-493b-a99e-5f7ef81bb62c/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.749 dark=0.721 bright=0.046"
+ },
+ {
+  "id": "9dbb3101-9918-4b61-946f-a34d7c7c662b",
+  "name": "East Houston St @ Ave B",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/9dbb3101-9918-4b61-946f-a34d7c7c662b/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.925 dark=0.486 bright=0.058"
+ },
+ {
+  "id": "a23d8461-9d7c-4e11-a392-777ef35b48ba",
+  "name": "Northern Blvd @ Little Neck Pkwy",
+  "area": "Queens",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/a23d8461-9d7c-4e11-a392-777ef35b48ba/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.737 dark=0.752 bright=0.048"
+ },
+ {
+  "id": "3309fba1-cc5f-483a-92bc-7d85951f1558",
+  "name": "FDR Dr @ Old Slip",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/3309fba1-cc5f-483a-92bc-7d85951f1558/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.843 dark=0.431 bright=0.104"
+ },
+ {
+  "id": "4602d793-d397-40c8-9748-de0d3dcddcfb",
+  "name": "QBB LL CM @ W Channel",
+  "area": "Manhattan",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/4602d793-d397-40c8-9748-de0d3dcddcfb/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.804 dark=0.614 bright=0.052"
+ },
+ {
+  "id": "d4338b6b-ddf6-41e9-9a64-1f0dd0b8ebdf",
+  "name": "Boston Rd. @ E 169 St",
+  "area": "Bronx",
+  "imageUrl": "https://webcams.nyctmc.org/api/cameras/d4338b6b-ddf6-41e9-9a64-1f0dd0b8ebdf/image",
+  "source": "nyc-dot",
+  "isOnline": "true",
+  "why": "noir scan 8-07 8:20 PM: spread=0.902 dark=0.37 bright=0.102"
+ }
+]

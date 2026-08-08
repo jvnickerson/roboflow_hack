@@ -13,13 +13,16 @@ The screen is never blank and the state file is never torn (tmp + os.replace).
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import threading
 import time
 import urllib.parse
 
+import numpy as np
 import requests
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -42,10 +45,20 @@ MODEL = os.environ.get("ROBOFLOW_MODEL", "coco/3")  # hosted COCO; the "yolov8n-
 PERSON_CLASSES = {"person"}
 VEHICLE_CLASSES = {"car", "truck", "bus", "motorcycle", "bicycle", "train"}
 
+NOIR_SPREAD = 0.55  # (p95-p5)/255 tonal range floor — 1940s noir wants the full ladder
+NOIR_DARK = 0.35    # fraction of pixels in deep shadow (<50)
+NOIR_BRIGHT = 0.02  # fraction of pixels in hard highlight (>200)
+
 CHANNELS = {
     "empty": {
+        "kind": "empty",
         "sources": "data/empty_cams.json",
         "state": "data/channel/empty.json",
+    },
+    "noir": {
+        "kind": "noir",
+        "sources": "data/noir_cams.json",
+        "state": "data/channel/noir.json",
     },
 }
 
@@ -71,6 +84,26 @@ def count_occupants(image_url: str, api_key: str) -> int | None:
         elif cls in VEHICLE_CLASSES and conf >= VEHICLE_CONF:
             n += 1
     return n
+
+
+def noir_badness(image_url: str) -> int | None:
+    """Distance from noir, 0 = qualifies. None on any failure (no sample).
+
+    Noir = deep shadows AND hard highlights AND a wide tonal range,
+    computed from the frame itself — no detection API involved.
+    """
+    resp = requests.get(image_url, timeout=8)
+    g = np.asarray(Image.open(io.BytesIO(resp.content)).convert("L"), dtype=np.float32)
+    p5, p95 = np.percentile(g, [5, 95])
+    spread = (p95 - p5) / 255
+    dark = float((g < 50).mean())
+    bright = float((g > 200).mean())
+    deficit = (
+        max(0.0, NOIR_SPREAD - spread)
+        + max(0.0, NOIR_DARK - dark)
+        + max(0.0, (NOIR_BRIGHT - bright) * 10)  # scale up: the bright band is narrow
+    )
+    return int(round(deficit * 100))
 
 
 class CamState:
@@ -108,8 +141,9 @@ def switcher_loop(channel: str = "empty") -> None:
     state_path = os.path.join(ROOT, cfg["state"])
     os.makedirs(os.path.dirname(state_path), exist_ok=True)
 
+    kind = cfg.get("kind", "empty")
     api_key = os.environ.get("ROBOFLOW_API_KEY")
-    if not api_key:
+    if kind == "empty" and not api_key:
         print(f"switcher_loop[{channel}]: no ROBOFLOW_API_KEY — degraded mode (timed rotation)")
 
     states = [CamState(c) for c in cams]  # list order = busyness priority
@@ -124,11 +158,14 @@ def switcher_loop(channel: str = "empty") -> None:
 
     def sample(cs: CamState, now: float) -> None:
         nonlocal api_calls, api_ok, last_error
-        if not api_key or not cs.available(now):
+        if (kind == "empty" and not api_key) or not cs.available(now):
             return
         api_calls += 1
         try:
-            n = count_occupants(cs.cam["imageUrl"], api_key)
+            if kind == "noir":
+                n = noir_badness(cs.cam["imageUrl"])
+            else:
+                n = count_occupants(cs.cam["imageUrl"], api_key)
         except Exception as exc:
             n = None
             last_error = f"{type(exc).__name__}: {exc}"[:200]
@@ -254,4 +291,5 @@ def switcher_loop(channel: str = "empty") -> None:
 
 
 if __name__ == "__main__":
-    switcher_loop("empty")
+    import sys
+    switcher_loop(sys.argv[1] if len(sys.argv) > 1 else "empty")

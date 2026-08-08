@@ -64,5 +64,6 @@ def healthz():
 
 if __name__ == "__main__":
     threading.Thread(target=sweep_loop, daemon=True).start()
-    threading.Thread(target=switcher.switcher_loop, args=("empty",), daemon=True).start()
+    for name in switcher.CHANNELS:
+        threading.Thread(target=switcher.switcher_loop, args=(name,), daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), threaded=True)
